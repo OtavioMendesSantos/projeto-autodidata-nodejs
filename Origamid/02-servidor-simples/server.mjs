@@ -2,21 +2,28 @@ import { createServer } from 'node:http';
 
 const PORT = 3000;
 
-const server = createServer((request, response) => {
-  response.setHeader('Content-Type', 'text/plain');
-  console.log("[Request received]", request.method, request.url);
-  switch (request.method) {
-    case 'GET':
-      response.statusCode = 200;
-      response.end('GET!');
-      break;
-    case 'POST':
-      response.statusCode = 201;
-      response.end('POST!');
-      break;
-    default:
-      response.statusCode = 404;
-      response.end('Página não encontrada!');
+const server = createServer((req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  // res.setHeader('Content-Type', 'text/plain; charset=utf-8'); 
+
+  const url = new URL(req.url || '/', 'http://localhost:' + PORT);
+  console.log('[Request received]', req.method, url.pathname);
+  console.log('[Request headers]', req.headers);
+
+  if (req.method === 'GET' && url.pathname === '/produtos') {
+    res.statusCode = 200;
+
+    const cor = url.searchParams.get('cor');
+    const tamanho = url.searchParams.get('tamanho');
+    console.log(url.searchParams, cor, tamanho);
+
+    res.end('GET!');
+  } else if (req.method === 'POST' && url.pathname === '/produtos') {
+    res.statusCode = 201;
+    res.end('POST!');
+  } else {
+    res.statusCode = 404;
+    res.end('Página não encontrada!');
   }
 });
 
