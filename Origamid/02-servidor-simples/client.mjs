@@ -10,10 +10,10 @@
 // console.log(response)
 // console.log(await response.text());
 
-// const response = await fetch('http://localhost:3000/produto?cor=azul&tamanho=g', { method: 'POST' });
-// console.log(response.headers)
+const response = await fetch('http://localhost:3000/produto?cor=azul&tamanho=g', { method: 'POST' });
+console.log(response.headers)
 // console.log(typeof await response.text()); // String
-// console.log(typeof await response.json()); // Object
+console.log(await response.json()); // Object
 
 // const response = await fetch('http://localhost:3000/', { method: 'GET' });
 // console.log(await response.text())
