@@ -1,7 +1,6 @@
 import { createServer } from 'node:http';
 import { Router } from './router.mjs';
-
-const PORT = 3000;
+import { customRequest } from './custom-request.mjs';
 
 const router = new Router();
 
@@ -12,44 +11,30 @@ router.get('/produto/notebook', (req, res) => {
   res.end('Produto - Notebook');
 });
 router.post('/produto', (req, res) => {
+  console.log(req.query.get('cor'), req.query.get('tamanho'));
   res.end('Notebook Post');
 });
 
-const server = createServer(async (req, res) => {
+const server = createServer(async (request, res) => {
+  const req = await customRequest(request);
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
   // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
-  );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  // res.setHeader(
+  //   'Access-Control-Allow-Methods',
+  //   'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
+  // );
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Cache
   // res.setHeader('Cache-Control', 'max-age=300, must-revalidate');
 
-  const url = new URL(req.url || '/', 'http://localhost:' + PORT);
-  const chunks = [];
-  for await (const chunk of req) {
-    chunks.push(chunk);
-  }
-  const body = Buffer.concat(chunks).toString('utf-8');
-
-  console.log('[Request received]', req.method, url.pathname);
+  console.log('[Request received]', req.method, req.pathname);
   console.log('[Request headers]', req.headers);
-  if (body != undefined && body != '') {
-    const safeParse = (() => {
-      try {
-        return JSON.parse(body);
-      } catch {
-        return undefined;
-      }
-    })();
-    if (safeParse) console.log('[Request body]', safeParse);
-  }
+  if (req.body) console.log('[Request body]', req.body);
 
-  const handler = router.find(req.method, url.pathname);
+  const handler = router.find(req.method, req.pathname);
   if (handler) {
     handler(req, res);
   } else {
@@ -58,6 +43,6 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}/`);
+server.listen(3000, () => {
+  console.log(`Server running on http://localhost:${3000}/`);
 });
