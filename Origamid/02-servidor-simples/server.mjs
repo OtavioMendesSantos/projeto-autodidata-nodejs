@@ -1,7 +1,19 @@
 import { createServer } from 'node:http';
-import { routes } from './router.mjs';
+import { Router } from './router.mjs';
 
 const PORT = 3000;
+
+const router = new Router();
+
+router.get('/', (req, res) => {
+  res.end('Home');
+});
+router.get('/produto/notebook', (req, res) => {
+  res.end('Produto - Notebook');
+});
+router.post('/produto', (req, res) => {
+  res.end('Notebook Post');
+});
 
 const server = createServer(async (req, res) => {
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -37,7 +49,7 @@ const server = createServer(async (req, res) => {
     if (safeParse) console.log('[Request body]', safeParse);
   }
 
-  const handler = routes[req.method][url.pathname];
+  const handler = router.find(req.method, url.pathname);
   if (handler) {
     handler(req, res);
   } else {
