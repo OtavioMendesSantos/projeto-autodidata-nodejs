@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { routes } from './router.mjs';
 
 const PORT = 3000;
 
@@ -35,43 +36,13 @@ const server = createServer(async (req, res) => {
     })();
     if (safeParse) console.log('[Request body]', safeParse);
   }
-  
-  if (req.method === 'OPTIONS') {
-    res.statusCode = 204;
-    res.end();
-  } else if (req.method === 'GET' && url.pathname === '/') {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.end(`<html>
-      <head>
-        <title>Hello World!</title>
-      </head>
-      <body>
-        <h1>Hello World!</h1>
-      </body>
-    </html>`);
-  } else if (req.method === 'GET' && url.pathname === '/produtos') {
-    res.statusCode = 200;
 
-    const cor = url.searchParams.get('cor');
-    const tamanho = url.searchParams.get('tamanho');
-    console.log(url.searchParams, cor, tamanho);
-
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ message: 'GET!' }));
-  } else if (req.method === 'POST' && url.pathname === '/produtos') {
-    res.statusCode = 201;
-    res.end('POST!');
-  } else if (req.method === 'POST' && url.pathname === '/login') {
-    res.statusCode = 200;
-    // Cookie
-    res.setHeader(
-      'Set-Cookie',
-      'token=123; HttpOnly; SameSite=Strict; Max-Age=3600; Path=/; Secure;',
-    );
-    res.end('LOGIN!');
+  const handler = routes[req.method][url.pathname];
+  if (handler) {
+    handler(req, res);
   } else {
     res.statusCode = 404;
-    res.end('Página não encontrada!');
+    res.end('Não encontrado');
   }
 });
 
