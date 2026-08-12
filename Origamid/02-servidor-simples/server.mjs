@@ -2,27 +2,50 @@ import { createServer } from 'node:http';
 import { Router } from './router.mjs';
 import { customRequest } from './custom-request.mjs';
 import { customResponse } from './custom-response.mjs';
+import {
+  handleAddProduto,
+  handleGetProduto,
+  handleGetProdutos,
+} from './handlers.mjs';
+
+/*
+1.  Crie 3 rotas
+    POST /produtos
+    GET  /produtos
+    GET  /produto?categoria=valor&slug=valor
+
+2.  POST /produtos
+    Deve permitir a escrita de um json em um arquivo:
+    {
+      "nome": "Notebook",
+      "slug": "notebook",
+      "categoria": "eletronicos",
+      "preco": 4000
+    }
+
+    O arquivo gerado deve ser: /produtos/${categoria}/${slug}.json
+
+3.  GET  /produtos
+    Retorna uma lista com todos os dados de todos os produtos em /produtos
+
+4.  GET  /produto?categoria=valor&slug=valor
+    Retorna o produto em: /produtos/${categoria}/${slug}.json
+
+5.  Use try/catch para evitar quebrar os servidor. Sirva erros ao cliente em caso de erro.
+*/
 
 const router = new Router();
 
-router.get('/', (req, res) => {
-  res.status(200).end('Home');
-});
-router.get('/produto/notebook', (req, res) => {
-  res.status(200).end('Produto - Notebook');
-});
-router.post('/produto', (req, res) => {
-  console.log(req.query.get('cor'), req.query.get('tamanho'));
-  res.status(201).json({ message: 'Notebook Post' });
-});
+router.post('/produtos', (req, res) => handleAddProduto(req, res));
+router.get('/produtos', (req, res) => handleGetProdutos(req, res));
+router.get('/produto', (req, res) => handleGetProduto(req, res));
 
 const server = createServer(async (request, response) => {
   const req = await customRequest(request);
   const res = customResponse(response);
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
 
-  // CORS
-  // res.setHeader('Access-Control-Allow-Origin', '*');
   // res.setHeader(
   //   'Access-Control-Allow-Methods',
   //   'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
