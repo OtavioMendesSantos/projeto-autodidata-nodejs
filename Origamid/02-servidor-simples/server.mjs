@@ -1,38 +1,12 @@
 import { createServer } from 'node:http';
 import { Router } from './router.mjs';
-import { customRequest } from './custom-request.mjs';
-import { customResponse } from './custom-response.mjs';
+import { customRequest } from './utils/custom-request.mjs';
+import { customResponse } from './utils/custom-response.mjs';
 import {
   handleAddProduto,
   handleGetProduto,
   handleGetProdutos,
 } from './handlers.mjs';
-
-/*
-1.  Crie 3 rotas
-    POST /produtos
-    GET  /produtos
-    GET  /produto?categoria=valor&slug=valor
-
-2.  POST /produtos
-    Deve permitir a escrita de um json em um arquivo:
-    {
-      "nome": "Notebook",
-      "slug": "notebook",
-      "categoria": "eletronicos",
-      "preco": 4000
-    }
-
-    O arquivo gerado deve ser: /produtos/${categoria}/${slug}.json
-
-3.  GET  /produtos
-    Retorna uma lista com todos os dados de todos os produtos em /produtos
-
-4.  GET  /produto?categoria=valor&slug=valor
-    Retorna o produto em: /produtos/${categoria}/${slug}.json
-
-5.  Use try/catch para evitar quebrar os servidor. Sirva erros ao cliente em caso de erro.
-*/
 
 const router = new Router();
 
