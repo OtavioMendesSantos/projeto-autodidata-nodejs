@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev:server": "node --watch server.mjs",
-    "dev:client": "node --watch client.mjs"
+    "dev:server": "node --watch server.ts",
+    "dev:client": "node --watch client.ts"
   },
   "devDependencies": {
     "@types/node": "^25.0.1"

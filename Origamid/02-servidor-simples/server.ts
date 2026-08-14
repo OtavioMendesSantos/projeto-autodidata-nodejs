@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
-import { Router } from './router.mjs';
-import { customRequest } from './utils/custom-request.mjs';
-import { customResponse } from './utils/custom-response.mjs';
+import { Router } from './router.ts';
+import { customRequest } from './utils/custom-request.ts';
+import { customResponse } from './utils/custom-response.ts';
 import {
   handleAddAula,
   handleAddCurso,
@@ -9,7 +9,7 @@ import {
   handleGetAulas,
   handleGetCurso,
   handleGetCursos,
-} from './handlers.mjs';
+} from './handlers.js';
 
 const router = new Router();
 

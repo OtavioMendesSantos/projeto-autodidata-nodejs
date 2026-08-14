@@ -1,4 +1,6 @@
-export function customResponse(res) {
+import { ServerResponse } from 'node:http';
+
+export function customResponse(res: ServerResponse) {
   res.status = (statusCode) => {
     res.statusCode = statusCode;
     return res;

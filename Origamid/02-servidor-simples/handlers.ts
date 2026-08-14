@@ -5,7 +5,7 @@ import {
   getCurso,
   getAulas,
   getAula,
-} from './database.mjs';
+} from './database.js';
 
 export async function handleAddCurso(req, res) {
   try {
