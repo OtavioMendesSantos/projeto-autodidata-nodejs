@@ -5,9 +5,10 @@ import {
   getCurso,
   getAulas,
   getAula,
-} from './database.js';
+} from './database.ts';
+import type { Handler } from './router.ts';
 
-export async function handleAddCurso(req, res) {
+export const handleAddCurso: Handler = (req, res) => {
   try {
     const { slug, nome, descricao } = req.body;
     if (!slug || !nome || !descricao) {
@@ -26,9 +27,9 @@ export async function handleAddCurso(req, res) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};
 
-export async function handleAddAula(req, res) {
+export const handleAddAula: Handler = (req, res) => {
   try {
     const { cursoSlug, slug, nome } = req.body;
     if (!slug || !nome || !cursoSlug) {
@@ -47,9 +48,9 @@ export async function handleAddAula(req, res) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};
 
-export async function handleGetCursos(req, res) {
+export const handleGetCursos: Handler = (req, res) => {
   try {
     const cursos = getCursos();
     if (!cursos || !cursos.length) {
@@ -63,9 +64,9 @@ export async function handleGetCursos(req, res) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};
 
-export async function handleGetCurso(req, res) {
+export const handleGetCurso: Handler = (req, res) => {
   try {
     const slug = req.query.get('slug');
     if (!slug) {
@@ -82,22 +83,22 @@ export async function handleGetCurso(req, res) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};
 
-export async function handleGetAulas(req, res) {
+export const handleGetAulas: Handler = (req, res) => {
   try {
     const cursoSlug = req.query.get('curso');
     if (!cursoSlug) {
       res.status(400).json({ message: 'Curso é obrigatório' });
       return;
     }
-    
+
     const aulas = getAulas({ cursoSlug });
     if (!aulas || !aulas.length) {
       res.status(400).json({ message: 'Aulas não encontrados.' });
       return;
     }
-    
+
     res
       .status(200)
       .json({ message: 'Aulas buscadas com sucesso', data: aulas });
@@ -105,24 +106,26 @@ export async function handleGetAulas(req, res) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};
 
-export async function handleGetAula(req, res) {
+export const handleGetAula: Handler = (req, res) => {
   try {
     const slug = req.query.get('slug');
     const curso = req.query.get('curso');
     if (!slug || !curso) {
-      res.status(400).json({message: "Slug e curso são obrigatórios"})
-      return
+      res.status(400).json({ message: 'Slug e curso são obrigatórios' });
+      return;
     }
-    const aula = getAula({slug,  curso})
+    const aula = getAula({ slug, curso });
     if (!aula) {
       res.status(404).json({ message: 'Aula não encontrada.' });
-      return
+      return;
     }
-    res.status(200).json({ message: 'Aula encontrada com sucesso.', data: aula });
+    res
+      .status(200)
+      .json({ message: 'Aula encontrada com sucesso.', data: aula });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
-}
+};

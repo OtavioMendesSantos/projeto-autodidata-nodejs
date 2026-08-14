@@ -9,7 +9,7 @@ import {
   handleGetAulas,
   handleGetCurso,
   handleGetCursos,
-} from './handlers.js';
+} from './handlers.ts';
 
 const router = new Router();
 
@@ -30,7 +30,7 @@ const server = createServer(async (request, response) => {
   console.log('[Request headers]', req.headers);
   if (req.body) console.log('[Request body]', req.body);
 
-  const handler = router.find(req.method, req.pathname);
+  const handler = router.find(req.method|| "", req.pathname);
   if (handler) {
     handler(req, res);
   } else {

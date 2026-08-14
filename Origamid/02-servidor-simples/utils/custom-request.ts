@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'node:http';
 
-interface CustomRequest extends IncomingMessage {
+export interface CustomRequest extends IncomingMessage {
   query: URLSearchParams;
   pathname: string;
   body: Record<string, any>;
