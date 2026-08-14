@@ -3,31 +3,28 @@ import { Router } from './router.mjs';
 import { customRequest } from './utils/custom-request.mjs';
 import { customResponse } from './utils/custom-response.mjs';
 import {
-  handleAddProduto,
-  handleGetProduto,
-  handleGetProdutos,
+  handleAddAula,
+  handleAddCurso,
+  handleGetAula,
+  handleGetAulas,
+  handleGetCurso,
+  handleGetCursos,
 } from './handlers.mjs';
 
 const router = new Router();
 
-router.post('/produtos', (req, res) => handleAddProduto(req, res));
-router.get('/produtos', (req, res) => handleGetProdutos(req, res));
-router.get('/produto', (req, res) => handleGetProduto(req, res));
+router.post('/cursos', (req, res) => handleAddCurso(req, res));
+router.post('/aulas', (req, res) => handleAddAula(req, res));
+router.get('/cursos', (req, res) => handleGetCursos(req, res));
+router.get('/curso', (req, res) => handleGetCurso(req, res));
+router.get('/aulas', (req, res) => handleGetAulas(req, res));
+router.get('/aula', (req, res) => handleGetAula(req, res));
 
 const server = createServer(async (request, response) => {
   const req = await customRequest(request);
   const res = customResponse(response);
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Access-Control-Allow-Origin', '*'); 
-
-  // res.setHeader(
-  //   'Access-Control-Allow-Methods',
-  //   'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
-  // );
-  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  // Cache
-  // res.setHeader('Cache-Control', 'max-age=300, must-revalidate');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   console.log('[Request received]', req.method, req.pathname);
   console.log('[Request headers]', req.headers);

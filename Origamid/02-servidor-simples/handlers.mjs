@@ -1,76 +1,90 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import {
+  addCurso,
+  addAula,
+  getCursos,
+  getCurso,
+  getAulas,
+  getAula,
+} from './database.mjs';
 
-export async function handleAddProduto(req, res) {
+export async function handleAddCurso(req, res) {
   try {
-    const { slug, categoria } = req.body;
-    if (!slug || !categoria) {
-      res.status(400).json({
-        message: 'Falta categoria e/ou slug.',
-      });
+    const { slug, nome, descricao } = req.body;
+    if (!slug || !nome || !descricao) {
+      res
+        .status(404)
+        .json({ message: 'Slug, nome e descrição são obrigatórios.' });
       return;
     }
-
-    const diretorio = `./produtos/${categoria}`;
-    await fs.mkdir(diretorio, { recursive: true });
-
-    await fs.writeFile(`${diretorio}/${slug}.json`, JSON.stringify(req.body));
-
-    res.status(201).json({ message: 'Produto inserido com sucesso.' });
+    const curso = addCurso({ slug, nome, descricao });
+    if (curso) {
+      res.status(201).json({ message: 'Curso adicionado com sucesso!' });
+    } else {
+      res.status(400).json({ message: 'Erro ao adicionar curso!' });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
 }
 
-export async function handleGetProduto(req, res) {
+export async function handleAddAula(req, res) {
   try {
-    const categoria = req.query.get('categoria');
-    const slug = req.query.get('slug');
-    if (!slug || !categoria) {
-      req.status(400).json({
-        message: 'Falta categoria e/ou slug.',
-      });
+    const { curso_id, slug, nome } = req.body;
+    if (!slug || !nome || !curso_id) {
+      res
+        .status(404)
+        .json({ message: 'Slug, nome e curso_id são obrigatórios.' });
       return;
     }
-
-    path.join('.', 'produtos', categoria, `${slug}.json`);
-    const file = await fs.readFile(filePath, 'utf-8');
-    if (!file) {
-      res.status(404).json({
-        message: 'Arquivo não encontrado.',
-      });
-      return;
-    }
-
-    res.status(200).json({
-      message: 'Produto retornado com sucesso.',
-      data: JSON.parse(file),
-    });
+    addAula({ curso_id, slug, nome });
+    res.status(201).json({ message: 'Aula adicionada com sucesso!' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Aconteceu um erro.' });
   }
 }
 
-export async function handleGetProdutos(req, res) {
+export async function handleGetCursos(req, res) {
   try {
-    const dir = await fs.readdir('./produtos', { recursive: true });
-    const filteredData = dir.filter((file) => file.endsWith('.json'));
-    const data = await Promise.all(
-      filteredData.map(async (item) => {
-        const filePath = path.join('./produtos', item);
-        const file = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(file);
-      }),
-    );
+    const { curso } = req.body;
 
-    res.status(200).json({
-      message: 'Produtos retornados com sucesso.',
-      data,
-    });
+    res.status(201).json({ message: '' });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ message: 'Aconteceu um erro.' });
+    res.status(500).json({ message: 'Aconteceu um erro.' });
+  }
+}
+
+export async function handleGetCurso(req, res) {
+  try {
+    const { curso } = req.body;
+
+    res.status(201).json({ message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Aconteceu um erro.' });
+  }
+}
+
+export async function handleGetAulas(req, res) {
+  try {
+    const { slug, curso } = req.body;
+
+    res.status(201).json({ message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Aconteceu um erro.' });
+  }
+}
+
+export async function handleGetAula(req, res) {
+  try {
+    const { slug, curso } = req.body;
+
+    res.status(201).json({ message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Aconteceu um erro.' });
   }
 }

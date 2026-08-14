@@ -1,26 +1,26 @@
-const resp1 = await fetch('http://localhost:3000/produtos', {
+const BASE_URL = 'http://localhost:3000';
+
+const curso = {
+  slug: 'html',
+  nome: 'HTML',
+  descricao: 'HTML completo',
+};
+
+const aula = {  curso_id: '1',  slug: 'aula-1',
+  nome: 'Grade horária'};
+
+const resp1 = await fetch(BASE_URL + '/cursos', {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify( {
-    "nome": "Notebook",
-    "slug": "notebook",
-    "categoria": "eletronicos",
-    "preco": 5000
-  }),
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(curso),
 });
 console.log(await resp1.json());
 
-const resp2 = await fetch('http://localhost:3000/produtos', {
-  method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify( {
-    "nome": "Cadeira",
-    "slug": "cadeira",
-    "categoria": "escritorio",
-    "preco": 600
-  }),
-});
-console.log(await resp2.json());
+// await fetch(BASE_URL + '/aulas', {
+//   method: 'POST',
+//   headers: { 'Content-Type': 'application/json' },
+//   body: JSON.stringify(aula),
+// });
 
 // const response = await fetch('http://localhost:3000/produtos', { method: 'GET' });
 // console.log(await response.text())
