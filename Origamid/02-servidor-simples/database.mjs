@@ -1,5 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
+import fs from "node:fs/promises"
 
+await fs.mkdir("./db", {recursive: true})
 const db = new DatabaseSync('./db/database.sqlite');
 
 db.exec(/*sql*/ `
@@ -41,32 +43,85 @@ export function addCurso({ slug, nome, descricao }) {
       )
       .run(slug, nome, descricao);
   } catch (err) {
-    console.err(err);
+    console.error(err);
     return null;
   }
 }
 
-export function addAula({ curso_id, slug, nome }) {
-  db.prepare(/*sql*/ `
-  `);
+export function addAula({ cursoSlug, slug, nome }) {
+  try {
+    return db
+      .prepare(
+        /*sql*/ `
+      INSERT OR IGNORE INTO "aulas"
+        ("slug", "nome", "curso_id")
+      VALUES
+        (?, ? ,(SELECT "id" FROM "cursos" WHERE "slug" = ?))
+    `,
+      )
+      .run(slug, nome, cursoSlug);
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export function getCursos({ slug }) {
-  db.prepare(/*sql*/ `
-  `);
+export function getCursos() {
+  try {
+    return db.prepare(/*sql*/ `SELECT * FROM "cursos"`).all();
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
 export function getCurso({ slug }) {
-  db.prepare(/*sql*/ `
-  `);
+  try {
+    return db
+      .prepare(
+        /*sql*/ `
+      SELECT * FROM "cursos"
+      WHERE "slug"= ?`,
+      )
+      .get(slug);
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-export function getAulas({ slug, curso }) {
-  db.prepare(/*sql*/ `
-  `);
+export function getAulas({ cursoSlug }) {
+  try {
+    return db
+      .prepare(
+        /*sql*/ `
+      SELECT * FROM "aulas"
+      WHERE "curso_id" = (
+        SELECT "id" FROM "cursos" WHERE "slug" = ?
+      )
+    `,
+      )
+      .all(cursoSlug);
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
 export function getAula({ slug, curso }) {
-  db.prepare(/*sql*/ `
-  `);
+  try {
+    return db
+      .prepare(
+        /*sql*/ `
+        SELECT * FROM "aulas"
+        WHERE "curso_id" = (
+          SELECT "id" FROM "cursos" WHERE "slug" = ?
+        ) AND "slug" = ?
+      `,
+      )
+      .get(curso, slug);
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
