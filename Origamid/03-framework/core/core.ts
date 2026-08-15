@@ -3,17 +3,17 @@ import type { IncomingMessage, ServerResponse, Server } from 'node:http';
 import { Router } from './router.ts';
 import { customRequest } from './http/custom-request.ts';
 import { customResponse } from './http/custom-response.ts';
+import { bodyJson } from './middleware/body-json.ts';
 
 export default class Core {
   PORT = 3000;
   router: Router;
   server: Server;
-  showCoreLogs: Boolean;
 
-  constructor(showCoreLogs = false) {
+  constructor() {
     this.router = new Router();
+    this.router.use([bodyJson])
     this.server = createServer(this.handler);
-    this.showCoreLogs = showCoreLogs;
   }
 
   handler = async (request: IncomingMessage, response: ServerResponse) => {
@@ -22,17 +22,18 @@ export default class Core {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (this.showCoreLogs) {
-      console.log('[Request received]', req.method, req.pathname);
-      console.log('[Request headers]', req.headers);
-      if (req.body) console.log('[Request body]', req.body);
+    for (const middleware of this.router.middlewares) {
+      await middleware(req, res)
     }
-
+    
     const matched = this.router.find(req.method || '', req.pathname);
     if (!matched) return res.status(404).end('Não encontrado');
     const { route, params } = matched;
     req.params = params;
-    await route(req, res);
+    for (const middleware of route.middlewares) {
+      await middleware(req, res);
+    }
+    await route.handler(req, res);
   };
 
   init = () => {
