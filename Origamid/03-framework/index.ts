@@ -4,8 +4,19 @@ import type { Handler } from './core/router.ts';
 
 const core = new Core();
 
-core.router.post('/', (req, res) => {
+core.router.get('/', (req, res) => {
   res.status(200).json({ message: 'hello world' });
 });
-
+core.router.get('/curso/:slug', (req, res) => {
+  console.log(req.params)
+  res.status(200).json({ message: 'hello world' });
+});
+core.router.get('/curso/:slug/grade', (req, res) => {
+  console.log(req.params)
+  res.status(200).json({ message: 'hello world' });
+});
+core.router.get('/aula/:slug', (req, res) => {
+  console.log(req.params)
+  res.status(200).json({ message: 'hello world' });
+});
 core.init();

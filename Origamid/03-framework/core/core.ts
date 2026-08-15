@@ -8,10 +8,12 @@ export default class Core {
   PORT = 3000;
   router: Router;
   server: Server;
+  showCoreLogs: Boolean;
 
-  constructor() {
+  constructor(showCoreLogs = false) {
     this.router = new Router();
     this.server = createServer(this.handler);
+    this.showCoreLogs = showCoreLogs;
   }
 
   handler = async (request: IncomingMessage, response: ServerResponse) => {
@@ -20,16 +22,17 @@ export default class Core {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    console.log('[Request received]', req.method, req.pathname);
-    console.log('[Request headers]', req.headers);
-    if (req.body) console.log('[Request body]', req.body);
-
-    const handler = this.router.find(req.method || '', req.pathname);
-    if (handler) {
-      handler(req, res);
-    } else {
-      res.status(404).end('Não encontrado');
+    if (this.showCoreLogs) {
+      console.log('[Request received]', req.method, req.pathname);
+      console.log('[Request headers]', req.headers);
+      if (req.body) console.log('[Request body]', req.body);
     }
+
+    const matched = this.router.find(req.method || '', req.pathname);
+    if (!matched) return res.status(404).end('Não encontrado');
+    const { route, params } = matched;
+    req.params = params;
+    await route(req, res);
   };
 
   init = () => {
