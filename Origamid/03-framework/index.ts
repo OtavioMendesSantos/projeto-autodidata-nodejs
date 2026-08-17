@@ -1,5 +1,4 @@
 import Core from './core/core.ts';
-import db from './core/database.ts';
 import { logger } from './core/middleware/logger.ts';
 import { RouteError } from './core/utils/route-error.ts';
 
