@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev:server": "node --watch index.ts",
+    "dev:client": "node --watch client.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.5"
+  }
+}
