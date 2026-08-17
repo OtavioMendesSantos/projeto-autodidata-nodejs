@@ -32,7 +32,8 @@ export default class Core {
       }
 
       const matched = this.router.find(req.method || '', req.pathname);
-      if (!matched) return res.status(404).end('Não encontrado');
+      if (!matched)
+        return res.status(404).json({ title: 'Rota não encontrada' });
       const { route, params } = matched;
       req.params = params;
       for (const middleware of route.middlewares) {
@@ -56,7 +57,7 @@ export default class Core {
         console.error(err);
       }
       response.statusCode = status;
-      response.end(JSON.stringify({ message: title, status }));
+      response.end(JSON.stringify({ title, status }));
     }
   };
 

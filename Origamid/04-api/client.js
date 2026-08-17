@@ -183,6 +183,16 @@ const functions = {
   async postLessons() {
     Promise.all(lessons.map((lesson) => functions.postLesson(lesson)));
   },
+  async getCourse() {
+    const response = await fetch(BASE_URL + '/lms/course/javascript-completo');
+    const body = await response.json();
+    console.log(body);
+  },
+  async getCourses() {
+    const response = await fetch(BASE_URL + '/lms/courses');
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
 const targetFunction = functions[process.argv[2]];
