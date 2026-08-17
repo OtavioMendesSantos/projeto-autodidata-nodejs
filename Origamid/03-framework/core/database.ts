@@ -1,10 +1,16 @@
 import { DatabaseSync, type StatementSync } from 'node:sqlite';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export class Database extends DatabaseSync {
   queries: Record<string, StatementSync>;
 
-  constructor(path: string) {
-    super(path);
+  constructor(dbPath: string) {
+    const dir = path.dirname(dbPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    super(dbPath);
     this.queries = {};
     this.exec(/*sql*/ `
       PRAGMA foreign_keys = 1;
@@ -21,12 +27,6 @@ export class Database extends DatabaseSync {
     if (!this.queries[sql]) {
       this.queries[sql] = this.prepare(sql);
     }
-    return this.queries[sql]
+    return this.queries[sql];
   }
 }
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// const dbDir = path.join(__dirname, 'db');
-// const dbPath = path.join(dbDir, 'database.sqlite');
-// await fs.mkdir(dbDir, { recursive: true });

@@ -17,7 +17,7 @@ export default class Core {
     this.router = new Router();
     this.router.use([bodyJson]);
     this.server = createServer(this.handler);
-    this.db = new Database('database.sqlite')
+    this.db = new Database('./database/db.sqlite');
   }
 
   handler = async (request: IncomingMessage, response: ServerResponse) => {
