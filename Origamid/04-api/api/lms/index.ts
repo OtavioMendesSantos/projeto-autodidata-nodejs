@@ -59,19 +59,28 @@ export default class lmsApi extends Api {
       });
     },
     getCourses: (req, res) => {
-      const courses = this.query.selectCourses()
+      const courses = this.query.selectCourses();
       if (!courses.length) {
-        throw new RouteError(404, "Nenhum curso encontrado")
+        throw new RouteError(404, 'Nenhum curso encontrado');
       }
-      res.status(200).json({title: "Cursos encontrados", data: courses})
+      res.status(200).json({ title: 'Cursos encontrados', data: courses });
     },
     getCourse: (req, res) => {
-      const {slug} = req.params
-      const course = this.query.selectCourse(slug)
+      const { slug } = req.params;
+      const course = this.query.selectCourse(slug);
       if (!course) {
-         throw new RouteError(404, "Curso não encontrado")
+        throw new RouteError(404, 'Curso não encontrado');
       }
-      res.status(200).json({title: "Curso encontrado", data: course})
+      const lessons = this.query.selectLessons(slug);
+      res.status(200).json({ title: 'Curso encontrado', course, lessons });
+    },
+    getLesson: (req, res) => {
+      const { courseSlug, lessonSlug } = req.params;
+      const lesson = this.query.selectLesson({ courseSlug, lessonSlug });
+      if (!lesson) {
+        throw new RouteError(404, 'Aula não encontrada');
+      }
+      res.status(200).json({ title: 'Aula encontrada', lesson });
     },
   } satisfies Api['handlers'];
 
@@ -84,5 +93,9 @@ export default class lmsApi extends Api {
     this.router.get('/lms/courses', this.handlers.getCourses);
     this.router.get('/lms/course/:slug', this.handlers.getCourse);
     this.router.post('/lms/lesson', this.handlers.postLesson);
+    this.router.get(
+      '/lms/lesson/:courseSlug/:lessonSlug',
+      this.handlers.getLesson,
+    );
   }
 }

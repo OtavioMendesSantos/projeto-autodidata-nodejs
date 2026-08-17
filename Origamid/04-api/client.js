@@ -193,6 +193,11 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async getLesson() {
+    const response = await fetch(BASE_URL + '/lms/lesson/javascript-completo/manipulando-o-dom');
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
 const targetFunction = functions[process.argv[2]];
