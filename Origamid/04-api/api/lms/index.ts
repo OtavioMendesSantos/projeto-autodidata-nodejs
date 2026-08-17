@@ -1,21 +1,22 @@
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
+import { LmsQuery } from './query.ts';
 import { lmsTables } from './tables.ts';
 
 export default class lmsApi extends Api {
+  query = new LmsQuery(this.db);
+
   handlers = {
-    postCourses: (req, res) => {
+    postCourse: (req, res) => {
       const { slug, title, description, lessons, hours } = req.body;
 
-      const writeResult = this.db
-        .query(
-          /* sql */ `
-        INSERT OR IGNORE INTO "courses"
-          ("slug","title","description","lessons","hours")
-        VALUES (?,?,?,?,?)
-      `,
-        )
-        .run(slug, title, description, lessons, hours);
+      const writeResult = this.query.insertCourse({
+        slug,
+        title,
+        description,
+        lessons,
+        hours,
+      });
 
       if (!writeResult.changes)
         throw new RouteError(400, 'Erro ao criar curso');
@@ -26,7 +27,7 @@ export default class lmsApi extends Api {
         changes: writeResult.changes,
       });
     },
-    postLessons: (req, res) => {
+    postLesson: (req, res) => {
       const {
         courseSlug,
         slug,
@@ -38,16 +39,16 @@ export default class lmsApi extends Api {
         free,
       } = req.body;
 
-      const writeResult = this.db
-        .query(
-          /* sql */ `
-        INSERT OR IGNORE INTO "lessons"
-          ("course_id", "slug", "title", "seconds",
-          "video", "description", "order", "free")
-        VALUES ((SELECT "id" FROM "courses" WHERE "slug" = ?),?,?,?,?,?,?,?)
-      `,
-        )
-        .run(courseSlug, slug, title, seconds, video, description, order, free);
+      const writeResult = this.query.insertLesson({
+        courseSlug,
+        slug,
+        title,
+        seconds,
+        video,
+        description,
+        order,
+        free,
+      });
 
       if (!writeResult.changes) throw new RouteError(400, 'Erro ao criar aula');
 
@@ -64,7 +65,7 @@ export default class lmsApi extends Api {
   }
 
   routes() {
-    this.router.post('/lms/courses', this.handlers.postCourses);
-    this.router.post('/lms/lessons', this.handlers.postLessons);
+    this.router.post('/lms/course', this.handlers.postCourse);
+    this.router.post('/lms/lesson', this.handlers.postLesson);
   }
 }

@@ -152,7 +152,7 @@ const functions = {
     console.log(body);
   },
   async postCourse() {
-    const response = await fetch(BASE_URL + '/lms/courses', {
+    const response = await fetch(BASE_URL + '/lms/course', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(courses.javascript),
@@ -172,7 +172,7 @@ const functions = {
       free: 1,
     };
 
-    const response = await fetch(BASE_URL + '/lms/lessons', {
+    const response = await fetch(BASE_URL + '/lms/lesson', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(lesson),
