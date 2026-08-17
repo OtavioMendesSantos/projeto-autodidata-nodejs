@@ -8,6 +8,26 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async postCourse() {
+    const response = await fetch(BASE_URL + '/lms/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: 'html-e-css',
+        title: 'HTML e CSS completo',
+        description: 'Curso completo, do básico ao avançado',
+        lessons: '60',
+        hours: '100',
+      }),
+    });
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
-functions[process.argv[2]](); // node ./client.js getProducts
+const targetFunction = functions[process.argv[2]];
+if (!targetFunction) {
+  console.warn('Função não encontrada, escreva corretamente e tente novamente');
+} else {
+  targetFunction(); // node ./client.js getProducts
+}
