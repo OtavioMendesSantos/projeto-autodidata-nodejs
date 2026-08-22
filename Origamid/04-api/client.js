@@ -198,6 +198,16 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async postUser() {
+    const user ={name: "Otávio", username: "otavio", email: "otavio@gmail.com", password: "123123"}
+    const response = await fetch(BASE_URL + '/auth/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user),
+    });
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
 const targetFunction = functions[process.argv[2]];
