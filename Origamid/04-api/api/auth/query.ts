@@ -21,8 +21,9 @@ export class AuthQuery extends Query {
       .query(
         /*sql*/ `
       INSERT OR IGNORE INTO "users"
-      ("name","username","email","role","password_hash")
-      VALUES(?,?,?,?,?)
+        ("name","username","email","role","password_hash")
+      VALUES
+        (?,?,?,?,?)
     `,
       )
       .run(name, username, email, role, password_hash);

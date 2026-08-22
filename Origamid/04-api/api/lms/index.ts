@@ -71,8 +71,31 @@ export default class lmsApi extends Api {
       if (!course) {
         throw new RouteError(404, 'Curso não encontrado');
       }
+
+      const userId = 1;
+      let completed: { lesson_id: number; completed: string }[] = [];
+      if (userId) {
+        completed = this.query.selectLessonsCompleted({
+          userId,
+          courseId: course.id,
+        });
+      }
+
       const lessons = this.query.selectLessons(slug);
-      res.status(200).json({ title: 'Curso encontrado', course, lessons });
+      res
+        .status(200)
+        .json({ title: 'Curso encontrado', course, lessons, completed });
+    },
+    resetCourse: (req, res) => {
+      const userId = 1;
+      const { courseId } = req.body;
+      const writeResult = this.query.deleteLessonsCompleted({
+        userId,
+        courseId,
+      });
+      if (!writeResult.changes)
+        throw new RouteError(400, 'Erro ao resetar curso');
+      res.status(200).json({ title: 'Curso resetado' });
     },
     getLesson: (req, res) => {
       const { courseSlug, lessonSlug } = req.params;
@@ -86,9 +109,19 @@ export default class lmsApi extends Api {
       const prev = i === 0 ? null : nav.at(i - 1)?.slug;
       const next = nav.at(i + 1)?.slug ?? null;
 
+      const userId = 1;
+      let completed = '';
+      if (userId) {
+        const lessonCompleted = this.query.selectLessonCompleted({
+          userId,
+          lessonId: lesson.id,
+        });
+        if (lessonCompleted) completed = lessonCompleted.completed;
+      }
+
       res.status(200).json({
         title: 'Aula encontrada',
-        lesson: { ...lesson, prev, next },
+        lesson: { ...lesson, prev, next, completed },
       });
     },
     postLessonCompleted: (req, res) => {
@@ -113,6 +146,7 @@ export default class lmsApi extends Api {
     this.router.post('/lms/course', this.handlers.postCourse);
     this.router.get('/lms/courses', this.handlers.getCourses);
     this.router.get('/lms/course/:slug', this.handlers.getCourse);
+    this.router.delete('/lms/course/reset', this.handlers.resetCourse);
     this.router.post('/lms/lesson', this.handlers.postLesson);
     this.router.get(
       '/lms/lesson/:courseSlug/:lessonSlug',

@@ -193,13 +193,30 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async resetCourse() {
+    const course = { courseId: '2' };
+    const response = await fetch(BASE_URL + '/lms/course/reset', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(course),
+    });
+    const body = await response.json();
+    console.log(body);
+  },
   async getLesson() {
-    const response = await fetch(BASE_URL + '/lms/lesson/javascript-completo/introducao-e-variaveis');
+    const response = await fetch(
+      BASE_URL + '/lms/lesson/javascript-completo/introducao-e-variaveis',
+    );
     const body = await response.json();
     console.log(body);
   },
   async postUser() {
-    const user ={name: "Otávio", username: "otavio", email: "otavio@gmail.com", password: "123123"}
+    const user = {
+      name: 'Otávio',
+      username: 'otavio',
+      email: 'otavio@gmail.com',
+      password: '123123',
+    };
     const response = await fetch(BASE_URL + '/auth/user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -209,7 +226,7 @@ const functions = {
     console.log(body);
   },
   async postLessonCompleted() {
-    const lesson ={courseId: "1", lessonId: "1"}
+    const lesson = { courseId: '2', lessonId: '8' };
     const response = await fetch(BASE_URL + '/lms/lesson/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

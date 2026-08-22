@@ -139,11 +139,59 @@ export class LmsQuery extends Query {
       .query(
         /*sql */ `
         INSERT OR IGNORE INTO "lessons_completed"
-        ("user_id", "course_id", "lesson_id")
+          ("user_id", "course_id", "lesson_id")
         VALUES
           (?,?,?)
       `,
       )
       .run(userId, courseId, lessonId);
+  }
+  selectLessonCompleted({
+    userId,
+    lessonId,
+  }: {
+    userId: number;
+    lessonId: number;
+  }) {
+    return this.db
+      .query(
+        /*sql */ `
+      SELECT "completed" FROM "lessons_completed" WHERE
+      "user_id" = ? AND "lesson_id" = ?
+      `,
+      )
+      .get(userId, lessonId) as { completed: string } | undefined;
+  }
+  selectLessonsCompleted({
+    userId,
+    courseId,
+  }: {
+    userId: number;
+    courseId: number;
+  }) {
+    return this.db
+      .query(
+        /*sql */ `
+      SELECT "completed", "lesson_id" FROM "lessons_completed" WHERE
+      "user_id" = ? AND "course_id" = ?
+      `,
+      )
+      .all(userId, courseId) as { completed: string; lesson_id: number }[];
+  }
+  deleteLessonsCompleted({
+    userId,
+    courseId,
+  }: {
+    userId: number;
+    courseId: number;
+  }) {
+    return this.db
+      .query(
+        /*sql */ `
+      DELETE FROM "lessons_completed" WHERE
+      "user_id" = ? AND "course_id" = ?
+    `,
+      )
+      .run(userId, courseId);
   }
 }
