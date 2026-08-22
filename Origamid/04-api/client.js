@@ -208,6 +208,16 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async postLessonCompleted() {
+    const lesson ={courseId: "1", lessonId: "1"}
+    const response = await fetch(BASE_URL + '/lms/lesson/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lesson),
+    });
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
 const targetFunction = functions[process.argv[2]];

@@ -91,6 +91,18 @@ export default class lmsApi extends Api {
         lesson: { ...lesson, prev, next },
       });
     },
+    postLessonCompleted: (req, res) => {
+      const userId = 1;
+      const { courseId, lessonId } = req.body;
+      const writeResult = this.query.insertLessonCompleted({
+        courseId,
+        lessonId,
+        userId,
+      });
+      if (!writeResult.changes)
+        throw new RouteError(400, 'Erro ao completar aula');
+      res.status(201).json({ title: 'Aula concluída' });
+    },
   } satisfies Api['handlers'];
 
   tables() {
@@ -106,5 +118,6 @@ export default class lmsApi extends Api {
       '/lms/lesson/:courseSlug/:lessonSlug',
       this.handlers.getLesson,
     );
+    this.router.post('/lms/lesson/complete', this.handlers.postLessonCompleted);
   }
 }
