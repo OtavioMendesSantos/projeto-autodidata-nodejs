@@ -1,3 +1,4 @@
+import { Certificates } from '@anthropic-ai/sdk/resources/beta/tunnels.js';
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { LmsQuery } from './query.ts';
@@ -124,9 +125,10 @@ export default class lmsApi extends Api {
         lesson: { ...lesson, prev, next, completed },
       });
     },
-    postLessonCompleted: (req, res) => {
+    completeLesson: (req, res) => {
       const userId = 1;
       const { courseId, lessonId } = req.body;
+
       const writeResult = this.query.insertLessonCompleted({
         courseId,
         lessonId,
@@ -134,7 +136,22 @@ export default class lmsApi extends Api {
       });
       if (!writeResult.changes)
         throw new RouteError(400, 'Erro ao completar aula');
-      res.status(201).json({ title: 'Aula concluída' });
+
+      const progress = this.query.selectProgress({ courseId, userId });
+      const incompleteLessons = progress.filter((l) => !l.completed);
+      console.log(incompleteLessons);
+      if (progress.length > 0 && incompleteLessons.length === 0) {
+        const certificate = this.query.insertCertificate({ userId, courseId });
+        if (!certificate) {
+          throw new RouteError(500, 'Erro ao gerar certificado');
+        }
+        res
+          .status(201)
+          .json({ title: 'Aula concluída', certificate: certificate.id });
+        return;
+      }
+
+      res.status(201).json({ title: 'Aula concluída', certificate: null });
     },
   } satisfies Api['handlers'];
 
@@ -152,6 +169,6 @@ export default class lmsApi extends Api {
       '/lms/lesson/:courseSlug/:lessonSlug',
       this.handlers.getLesson,
     );
-    this.router.post('/lms/lesson/complete', this.handlers.postLessonCompleted);
+    this.router.post('/lms/lesson/complete', this.handlers.completeLesson);
   }
 }

@@ -226,7 +226,7 @@ const functions = {
     console.log(body);
   },
   async postLessonCompleted() {
-    const lesson = { courseId: '2', lessonId: '8' };
+    const lesson = { courseId: '1', lessonId: '7' };
     const response = await fetch(BASE_URL + '/lms/lesson/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
