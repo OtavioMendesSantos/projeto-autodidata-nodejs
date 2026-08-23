@@ -1,4 +1,3 @@
-import { Certificates } from '@anthropic-ai/sdk/resources/beta/tunnels.js';
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { LmsQuery } from './query.ts';
@@ -153,6 +152,26 @@ export default class lmsApi extends Api {
 
       res.status(201).json({ title: 'Aula concluída', certificate: null });
     },
+    getCertificates: (req, res) => {
+      const userId = 1;
+      const certificates = this.query.selectCertificates({ userId });
+      if (!certificates.length) {
+        throw new RouteError(404, 'Nenhum certificado encontrado');
+      }
+      res
+        .status(200)
+        .json({ title: 'Certificados encontrados com sucesso', certificates });
+    },
+    getCertificate: (req, res) => {
+      const { id } = req.params;
+      const certificate = this.query.selectCertificate({ id });
+      if (!certificate) {
+        throw new RouteError(404, 'Certificado não encontrado');
+      }
+      res
+        .status(200)
+        .json({ title: 'Certificado encontrado com sucesso', certificate });
+    },
   } satisfies Api['handlers'];
 
   tables() {
@@ -170,5 +189,7 @@ export default class lmsApi extends Api {
       this.handlers.getLesson,
     );
     this.router.post('/lms/lesson/complete', this.handlers.completeLesson);
+    this.router.get('/lms/certificates', this.handlers.getCertificates);
+    this.router.get('/lms/certificate/:id', this.handlers.getCertificate);
   }
 }

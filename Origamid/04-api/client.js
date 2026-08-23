@@ -235,6 +235,16 @@ const functions = {
     const body = await response.json();
     console.log(body);
   },
+  async getCertificates() {
+    const response = await fetch(BASE_URL + '/lms/certificates');
+    const body = await response.json();
+    console.log(body);
+  }, 
+  async getCertificate() {
+    const response = await fetch(BASE_URL + '/lms/certificate/42edec367427847d');
+    const body = await response.json();
+    console.log(body);
+  },
 };
 
 const targetFunction = functions[process.argv[2]];
