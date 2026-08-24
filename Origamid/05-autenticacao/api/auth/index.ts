@@ -45,8 +45,7 @@ export default class authApi extends Api {
         ip: req.ip,
         ua: req.headers['user-agent'] ?? '',
       });
-
-      res.setHeader('Set-Cookie', cookie);
+      res.setCookie(cookie);
       res.status(200).json({ title: 'Login realizado' });
     },
   } satisfies Api['handlers'];
