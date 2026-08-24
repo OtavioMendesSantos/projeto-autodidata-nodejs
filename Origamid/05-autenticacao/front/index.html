@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tiny LMS</title>
-</head>
-<body>
+  </head>
+  <body>
     <style>
       * {
         box-sizing: border-box;
@@ -35,50 +35,74 @@
         border: 1px solid #222;
       }
       input {
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.025)
+        );
       }
       input:focus {
         outline: white;
         border-color: white;
       }
       button {
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.15),
+          rgba(255, 255, 255, 0.05)
+        );
         cursor: pointer;
       }
       button:hover {
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.1)
+        );
       }
     </style>
     <form id="login">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required value="otavio@gmail.com">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required value="123123">
-        <button type="submit">Login</button>
+      <label for="email">Email</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        required
+        value="otavio@gmail.com"
+      />
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        value="123123"
+      />
+      <button type="submit">Login</button>
     </form>
-    <pre id="result"/>
+    <pre id="result" />
     <script>
-        const form = document.getElementById('login');
-        const result = document.getElementById('result');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = new FormData(form);
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers:{
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(Object.fromEntries(data))
-            });
-        })
+      const form = document.getElementById('login');
+      const result = document.getElementById('result');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(Object.fromEntries(data)),
+        });
+      });
 
-        async function autenticado() {
-            const response = await fetch('/segura');
-            const body = await response.json();
-            result.innerText = JSON.stringify(body, null, 2);
-        }
+      async function autenticado() {
+        const response = await fetch('/segura');
+        const body = await response.json();
+        result.innerText = JSON.stringify(body, null, 2);
+      }
 
-        autenticado()
+      autenticado();
     </script>
-</body>
+  </body>
 </html>
