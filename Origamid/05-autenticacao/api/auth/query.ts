@@ -35,7 +35,7 @@ export class AuthQuery extends Query {
     ip,
     ua,
   }: {
-    sid_hash: string;
+    sid_hash: Buffer;
     user_id: number;
     expires_ms: number;
     ip: string;

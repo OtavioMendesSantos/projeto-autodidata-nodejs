@@ -4,6 +4,7 @@ import lmsApi from './api/lms/index.ts';
 import { logger } from './core/middleware/logger.ts';
 import { readFile } from 'node:fs/promises';
 import { RouteError } from './core/utils/route-error.ts';
+import { sha256 } from './api/auth/utils.ts';
 
 const core = new Core();
 // core.router.use([logger]);
@@ -17,8 +18,10 @@ core.router.get('/', async (req, res) => {
   res.status(200).end(index);
 });
 core.router.get('/segura', async (req, res) => {
-  const id = req.headers.cookie?.replace('sid=', '');
-  if (!id) throw new RouteError(401, 'Não autenticado');
+  const sid = req.headers.cookie?.replace('sid=', '');
+  if (!sid) throw new RouteError(401, 'Não autenticado');
+
+  const sid_hash = sha256(sid);
 
   const session = core.db
     .query(
@@ -27,7 +30,7 @@ core.router.get('/segura', async (req, res) => {
         FROM "sessions" WHERE "sid_hash" = ?
       `,
     )
-    .get(id);
+    .get(sid_hash);
 
   if (!session) throw new RouteError(404, 'Usuário não encontrado');
 
