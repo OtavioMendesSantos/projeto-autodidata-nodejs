@@ -2,13 +2,20 @@ import { CoreProvider } from '../../../core/utils/abstract.ts';
 import { AuthQuery } from '../query.ts';
 import { randomBytesAsync, sha256 } from '../utils.ts';
 
-const TTL_SEC = 60 * 60 * 24 * 15;
+export const COOKIE_SID_NAME = '__Secure-sid';
+
+const TTL_SEC_15_DAYS = 60 * 60 * 24 * 15;
+const TTL_SEC_5_DAYS = 60 * 60 * 24 * 5;
+
+function sidCookie(sid: string, expires: number) {
+  return `${COOKIE_SID_NAME}=${sid}; Path=/; HttpOnly; Secure; Max-Age=${expires}; SameSite=Lax`;
+}
 
 export class SessionService extends CoreProvider {
   query = new AuthQuery(this.db);
 
   async create({ userId, ip, ua }: { userId: number; ip: string; ua: string }) {
-    const expires_ms = Date.now() + TTL_SEC * 1000; // 15 dias
+    const expires_ms = Date.now() + TTL_SEC_15_DAYS * 1000; // 15 dias
 
     const sid = (await randomBytesAsync(32)).toString('base64url');
     const sid_hash = sha256(sid);
@@ -21,8 +28,59 @@ export class SessionService extends CoreProvider {
       expires_ms,
     });
 
-    const cookie = `__Secure-sid=${sid}; Path=/; HttpOnly; Secure; Max-Age=${TTL_SEC}; SameSite=Lax`;
+    const cookie = sidCookie(sid, TTL_SEC_15_DAYS);
 
     return { cookie };
+  }
+
+  async validate(sid: string) {
+    const now = Date.now();
+    const sid_hash = sha256(sid);
+    const session = this.query.selectSession({ sid_hash });
+
+    if (!session || session.revoked) {
+      return {
+        valid: false,
+        cookie: sidCookie('', 0),
+      };
+    }
+
+    let expires_ms = session.expires_ms;
+
+    if (now >= session.expires_ms) {
+      this.query.revokeSession({ key: 'sid_hash', sid_hash });
+      return {
+        valid: false,
+        cookie: sidCookie('', 0),
+      };
+    }
+
+    if (now >= session.expires_ms - 1000 * TTL_SEC_5_DAYS) {
+      const expires_msUpdate = now + TTL_SEC_15_DAYS * 1000;
+      this.query.updateSessionExpires({
+        sid_hash,
+        expires_ms: expires_msUpdate,
+      });
+      expires_ms = expires_msUpdate;
+    }
+
+    const user = this.query.selectUserRole({ user_id: session.user_id });
+    if (!user) {
+      this.query.revokeSession({ key: 'sid_hash', sid_hash });
+      return {
+        valid: false,
+        cookie: sidCookie('', 0),
+      };
+    }
+
+    return {
+      valid: true,
+      cookie: sidCookie(sid, Math.floor((expires_ms - now) / 1000)),
+      session: {
+        userId: session.user_id,
+        role: user.role,
+        expires_ms,
+      },
+    };
   }
 }

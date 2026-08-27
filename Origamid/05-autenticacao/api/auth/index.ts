@@ -1,7 +1,7 @@
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { AuthQuery } from './query.ts';
-import { SessionService } from './services/session.ts';
+import { COOKIE_SID_NAME, SessionService } from './services/session.ts';
 import { authTables } from './tables.ts';
 
 export default class authApi extends Api {
@@ -48,6 +48,20 @@ export default class authApi extends Api {
       res.setCookie(cookie);
       res.status(200).json({ title: 'Login realizado' });
     },
+    getSession: async (req, res) => {
+      const sid = req.cookies[COOKIE_SID_NAME];
+      if (!sid) {
+        throw new RouteError(401, 'Não autorizado');
+      }
+      const {valid, cookie, session} = await this.session.validate(sid);
+      res.setCookie(cookie);
+      if (!valid || !session) {
+        throw new RouteError(401, 'Não autorizado');
+      }
+      res.setHeader( "Cache-Control", "private, no-store" );
+      res.setHeader("Vary", "Cookie");
+      res.status(200).json({ title: 'Sessão válida', session });
+    },
   } satisfies Api['handlers'];
 
   tables() {
@@ -57,5 +71,6 @@ export default class authApi extends Api {
   routes() {
     this.router.post('/auth/user', this.handlers.postUser);
     this.router.post('/auth/login', this.handlers.postLogin);
+    this.router.get('/auth/session', this.handlers.getSession);
   }
 }

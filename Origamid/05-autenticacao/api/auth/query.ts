@@ -54,4 +54,60 @@ export class AuthQuery extends Query {
       )
       .run(sid_hash, user_id, Math.floor(expires_ms / 1000), ip, ua);
   }
+  selectSession({ sid_hash }: { sid_hash: Buffer }) {
+    return this.db
+      .query(
+        /*sql*/ `
+      SELECT 
+        "s".*, "s"."expires" * 1000 as "expires_ms" 
+      FROM "sessions" as "s"
+        WHERE "s"."sid_hash" = ?
+      `,
+      )
+      .get(sid_hash) as (SessionData & { expires_ms: number }) | undefined;
+  }
+  revokeSession({
+    key,
+    sid_hash,
+  }: {
+    key: 'user_id' | 'sid_hash';
+    sid_hash: Buffer;
+  }) {
+    if (key !== 'user_id' && key !== 'sid_hash')
+      throw new Error('Key inválida.');
+
+    return this.db
+      .query(
+        /*sql*/ `
+      UPDATE "sessions" 
+      SET "revoked" = 1
+      WHERE ${key} = ?
+      `,
+      )
+      .run(sid_hash);
+  }
+  updateSessionExpires({
+    expires_ms,
+    sid_hash,
+  }: {
+    expires_ms: number;
+    sid_hash: Buffer;
+  }) {
+    return this.db
+      .query(
+        /*sql*/ `
+      UPDATE "sessions" SET "expires" = ?
+      WHERE "sid_hash" = ?
+      `,
+      )
+      .run(Math.floor(expires_ms / 1000), sid_hash);
+  }
+  selectUserRole({ user_id }: { user_id: number }) {
+    return this.db.query(
+      /*sql*/ `
+      SELECT "role" FROM "users"
+      WHERE "id" = ?
+      `,
+    ).get(user_id) as { role: UserRole } | undefined;
+  }
 }
