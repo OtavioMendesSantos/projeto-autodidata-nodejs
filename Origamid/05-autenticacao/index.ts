@@ -3,8 +3,6 @@ import authApi from './api/auth/index.ts';
 import lmsApi from './api/lms/index.ts';
 import { logger } from './core/middleware/logger.ts';
 import { readFile } from 'node:fs/promises';
-import { RouteError } from './core/utils/route-error.ts';
-import { sha256 } from './api/auth/utils.ts';
 
 const core = new Core();
 // core.router.use([logger]);

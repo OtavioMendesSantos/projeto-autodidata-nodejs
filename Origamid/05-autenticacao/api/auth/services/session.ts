@@ -1,11 +1,18 @@
 import { CoreProvider } from '../../../core/utils/abstract.ts';
 import { AuthQuery } from '../query.ts';
 import { randomBytesAsync, sha256 } from '../utils.ts';
+import type { UserRole } from '../query.ts';
 
 export const COOKIE_SID_NAME = '__Secure-sid';
 
 const TTL_SEC_15_DAYS = 60 * 60 * 24 * 15;
 const TTL_SEC_5_DAYS = 60 * 60 * 24 * 5;
+
+export type Session = {
+  userId: number;
+  role: UserRole;
+  expires_ms: number;
+}
 
 function sidCookie(sid: string, expires: number) {
   return `${COOKIE_SID_NAME}=${sid}; Path=/; HttpOnly; Secure; Max-Age=${expires}; SameSite=Lax`;
