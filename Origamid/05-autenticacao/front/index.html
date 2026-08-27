@@ -60,6 +60,10 @@
           rgba(255, 255, 255, 0.1)
         );
       }
+      #logout {
+        width: 200px;
+        margin: 0 auto;
+      }
     </style>
     <form id="login">
       <label for="email">Email</label>
@@ -80,10 +84,15 @@
       />
       <button type="submit">Login</button>
     </form>
+
+    <button id="logout">Log Out</button>
+
     <pre id="result" />
     <script>
       const form = document.getElementById('login');
       const result = document.getElementById('result');
+      const logout = document.getElementById('logout');
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = new FormData(form);
@@ -100,13 +109,23 @@
       });
 
       async function autenticado() {
-        const response = await fetch('/lms/course/html-e-css');
-        // const response = await fetch('/auth/session');
+        // const response = await fetch('/lms/course/html-e-css');
+        const response = await fetch('/auth/session');
         const body = await response.json();
         result.innerText = JSON.stringify(body, null, 2);
       }
 
       autenticado();
+
+      logout.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const response = await fetch('/auth/logout', {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          window.location.reload();
+        }
+      });
     </script>
   </body>
 </html>

@@ -12,7 +12,7 @@ export type Session = {
   userId: number;
   role: UserRole;
   expires_ms: number;
-}
+};
 
 function sidCookie(sid: string, expires: number) {
   return `${COOKIE_SID_NAME}=${sid}; Path=/; HttpOnly; Secure; Max-Age=${expires}; SameSite=Lax`;
@@ -88,6 +88,18 @@ export class SessionService extends CoreProvider {
         role: user.role,
         expires_ms,
       },
+    };
+  }
+  async inValidate(sid: string | undefined) {
+    const cookie = sidCookie('', 0);
+    try {
+      if (sid) {
+        const sid_hash = sha256(sid);
+        this.query.revokeSession({ key: 'sid_hash', sid_hash });
+      }
+    } catch {}
+    return {
+      cookie,
     };
   }
 }

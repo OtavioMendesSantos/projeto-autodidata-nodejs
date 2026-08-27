@@ -1,5 +1,6 @@
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
+import { AuthMiddleware } from './middleware/auth.ts';
 import { AuthQuery } from './query.ts';
 import { COOKIE_SID_NAME, SessionService } from './services/session.ts';
 import { authTables } from './tables.ts';
@@ -8,6 +9,7 @@ export default class authApi extends Api {
   query = new AuthQuery(this.db);
 
   session = new SessionService(this.core);
+  authMiddleware = new AuthMiddleware(this.core);
 
   handlers = {
     postUser: (req, res) => {
@@ -49,18 +51,18 @@ export default class authApi extends Api {
       res.status(200).json({ title: 'Login realizado' });
     },
     getSession: async (req, res) => {
+      if (!req.session) {
+        throw new RouteError(401, 'Não autorizado');
+      }
+      res.status(200).json({ title: 'Sessão válida' });
+    },
+    deleteSession: async (req, res) => {
       const sid = req.cookies[COOKIE_SID_NAME];
-      if (!sid) {
-        throw new RouteError(401, 'Não autorizado');
-      }
-      const {valid, cookie, session} = await this.session.validate(sid);
+      const { cookie } = await this.session.inValidate(sid);
       res.setCookie(cookie);
-      if (!valid || !session) {
-        throw new RouteError(401, 'Não autorizado');
-      }
-      res.setHeader( "Cache-Control", "private, no-store" );
-      res.setHeader("Vary", "Cookie");
-      res.status(200).json({ title: 'Sessão válida', session });
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('Vary', 'Cookie');
+      res.status(204).json({ title: 'Logout' });
     },
   } satisfies Api['handlers'];
 
@@ -71,6 +73,9 @@ export default class authApi extends Api {
   routes() {
     this.router.post('/auth/user', this.handlers.postUser);
     this.router.post('/auth/login', this.handlers.postLogin);
-    this.router.get('/auth/session', this.handlers.getSession);
+    this.router.delete('/auth/logout', this.handlers.deleteSession);
+    this.router.get('/auth/session', this.handlers.getSession, [
+      this.authMiddleware.guard('user'),
+    ]);
   }
 }
