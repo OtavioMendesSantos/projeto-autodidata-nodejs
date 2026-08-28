@@ -1,14 +1,12 @@
 import {
   type BinaryLike,
   type ScryptOptions,
-  createHash,
   createHmac,
   randomBytes,
   scrypt,
+  timingSafeEqual,
 } from 'node:crypto';
 import { promisify } from 'node:util';
-
-const PEPPER = 'sFCEZgrGAYuv';
 
 const randomBytesAsync = promisify(randomBytes);
 
@@ -19,23 +17,49 @@ const scryptAsync: (
   options?: ScryptOptions,
 ) => Promise<Buffer> = promisify(scrypt);
 
-const salt = await randomBytesAsync(16);
-
-// const sha = createHash('sha256').update('12345678').digest(); // Rainbow tables
-const password = 'P@ssw0rd!';
-const password_normalized = password.normalize('NFC');
-const password_hmac = createHmac('sha-256', PEPPER)
-  .update(password_normalized)
-  .digest();
-
-console.time('scrypt');
 const SCRYPT_OPTIONS: ScryptOptions = {
-  N: 2 ** 14, // quantidade de memória CPU a ser utilizada
+  // quantidade de memória/CPU a ser utilizada, a partir de 15, deve configurar a quantidade máxima de memória
+  N: 2 ** 14,
   r: 8, // Block size,
   p: 1, // Paralelismo
 };
-const dk = await scryptAsync(password_hmac, salt, 32, SCRYPT_OPTIONS);
-console.timeEnd('scrypt');
 
-const password_hash = `${salt.toString('hex')}$${dk.toString('hex')}`;
-console.log(password_hash);
+const PEPPER = 'sFCEZgrGAYuv';
+
+function parsePasswordHash(password_hash: string) {
+  const [stored_salt_hex, stored_dk_hex] = password_hash.split('$');
+  const stored_dk = Buffer.from(stored_dk_hex, 'hex');
+  const stored_salt = Buffer.from(stored_salt_hex, 'hex');
+  return { stored_dk, stored_salt };
+}
+
+async function hashPassword(password: string) {
+  const password_normalized = password.normalize('NFC');
+  const password_hmac = createHmac('sha256', PEPPER)
+    .update(password_normalized)
+    .digest();
+  const salt = await randomBytesAsync(16);
+
+  console.time('scrypt');
+  const dk = await scryptAsync(password_hmac, salt, 32, SCRYPT_OPTIONS);
+  console.timeEnd('scrypt');
+
+  return `${salt.toString('hex')}$${dk.toString('hex')}`;
+}
+
+async function verifyPassword(password: string, password_hash: string) {
+  const { stored_dk, stored_salt } = parsePasswordHash(password_hash);
+  const password_normalized = password.normalize('NFC');
+  const password_hmac = createHmac('sha256', PEPPER)
+    .update(password_normalized)
+    .digest();
+  const dk = await scryptAsync(password_hmac, stored_salt, 32, SCRYPT_OPTIONS);
+  if (dk.length !== stored_dk.length) return false;
+  return timingSafeEqual(dk, stored_dk);
+}
+
+const password = 'P@ssw0rd!';
+const passwordHash = await hashPassword(password);
+
+console.log(await verifyPassword(password, passwordHash));
+console.log(await verifyPassword("P@ssw0rd!!", passwordHash));
