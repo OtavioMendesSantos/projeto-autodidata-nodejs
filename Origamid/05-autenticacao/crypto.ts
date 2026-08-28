@@ -25,16 +25,27 @@ const SCRYPT_OPTIONS: ScryptOptions = {
 };
 
 const PEPPER = 'sFCEZgrGAYuv';
+const NORM = 'NFC';
 
 function parsePasswordHash(password_hash: string) {
-  const [stored_salt_hex, stored_dk_hex] = password_hash.split('$');
+  const [id, v, norm, options, stored_salt_hex, stored_dk_hex] =
+    password_hash.split('$');
+
+  const stored_norm = norm.replace('norm=', '');
+  const stored_options = options
+    .split(',')
+    .reduce<Record<string, number>>((acc, kv) => {
+      const [k, v] = kv.split('=');
+      acc[k] = Number(v);
+      return acc;
+    }, {});
   const stored_dk = Buffer.from(stored_dk_hex, 'hex');
   const stored_salt = Buffer.from(stored_salt_hex, 'hex');
-  return { stored_dk, stored_salt };
+  return { stored_norm, stored_options, stored_dk, stored_salt };
 }
 
 async function hashPassword(password: string) {
-  const password_normalized = password.normalize('NFC');
+  const password_normalized = password.normalize(NORM);
   const password_hmac = createHmac('sha256', PEPPER)
     .update(password_normalized)
     .digest();
@@ -44,16 +55,20 @@ async function hashPassword(password: string) {
   const dk = await scryptAsync(password_hmac, salt, 32, SCRYPT_OPTIONS);
   console.timeEnd('scrypt');
 
-  return `${salt.toString('hex')}$${dk.toString('hex')}`;
+  return (
+    `scrypt$v1$norm=${NORM}$N=${SCRYPT_OPTIONS.N},r=${SCRYPT_OPTIONS.r},p=${SCRYPT_OPTIONS.p}` +
+    `$${salt.toString('hex')}$${dk.toString('hex')}`
+  );
 }
 
 async function verifyPassword(password: string, password_hash: string) {
-  const { stored_dk, stored_salt } = parsePasswordHash(password_hash);
-  const password_normalized = password.normalize('NFC');
+  const { stored_dk, stored_options, stored_salt, stored_norm } =
+    parsePasswordHash(password_hash);
+  const password_normalized = password.normalize(stored_norm);
   const password_hmac = createHmac('sha256', PEPPER)
     .update(password_normalized)
     .digest();
-  const dk = await scryptAsync(password_hmac, stored_salt, 32, SCRYPT_OPTIONS);
+  const dk = await scryptAsync(password_hmac, stored_salt, 32, stored_options);
   if (dk.length !== stored_dk.length) return false;
   return timingSafeEqual(dk, stored_dk);
 }
@@ -62,4 +77,4 @@ const password = 'P@ssw0rd!';
 const passwordHash = await hashPassword(password);
 
 console.log(await verifyPassword(password, passwordHash));
-console.log(await verifyPassword("P@ssw0rd!!", passwordHash));
+console.log(await verifyPassword('P@ssw0rd!!', passwordHash));
