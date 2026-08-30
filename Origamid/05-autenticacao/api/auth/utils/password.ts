@@ -18,11 +18,11 @@ const scryptAsync: (
 ) => Promise<Buffer> = promisify(scrypt);
 
 export class Password {
-  PEPPER: string;
-  NORM = 'NFC';
-  DK_LEN = 32;
-  SALT_LEN = 16;
-  SCRYPT_OPTIONS: ScryptOptions = {
+  private PEPPER: string;
+  private NORM = 'NFC';
+  private DK_LEN = 32;
+  private SALT_LEN = 16;
+  private SCRYPT_OPTIONS: ScryptOptions = {
     N: 2 ** 14,
     r: 8,
     p: 1,
@@ -88,8 +88,3 @@ export class Password {
     return timingSafeEqual(dk, stored_dk);
   }
 }
-
-const password = new Password('segredo');
-const pass = "123123"
-const pass_hash = await  password.hash(pass)
-console.log(await password.verify("pass", pass_hash))

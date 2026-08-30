@@ -1,6 +1,6 @@
 import { CoreProvider } from '../../../core/utils/abstract.ts';
 import { AuthQuery } from '../query.ts';
-import { randomBytesAsync, sha256 } from '../utils.ts';
+import { randomBytesAsync, sha256 } from '../utils/utils.ts';
 import type { UserRole } from '../query.ts';
 
 export const COOKIE_SID_NAME = '__Secure-sid';

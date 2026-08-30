@@ -42,6 +42,25 @@ export class AuthQuery extends Query {
       )
       .run(name, username, email, role, password_hash);
   }
+  selectUser({
+    key,
+    value,
+  }: {
+    key: 'email' | 'username' | 'id';
+    value: string;
+  }) {
+    if (key !== 'email' && key !== 'username' && key !== 'id')
+      throw new Error('Key inválida.');
+
+    return this.db
+      .query(
+        /*sql*/ `
+            SELECT "id", "password_hash"
+            FROM users WHERE ${key} = ?
+          `,
+      )
+      .get(value) as { id: number; password_hash: string } | undefined;
+  }
   insertSession({ sid_hash, user_id, expires_ms, ip, ua }: SessionCreate) {
     return this.db
       .query(
@@ -103,11 +122,13 @@ export class AuthQuery extends Query {
       .run(Math.floor(expires_ms / 1000), sid_hash);
   }
   selectUserRole({ user_id }: { user_id: number }) {
-    return this.db.query(
-      /*sql*/ `
+    return this.db
+      .query(
+        /*sql*/ `
       SELECT "role" FROM "users"
       WHERE "id" = ?
       `,
-    ).get(user_id) as { role: UserRole } | undefined;
+      )
+      .get(user_id) as { role: UserRole } | undefined;
   }
 }

@@ -4,17 +4,37 @@ import { AuthMiddleware } from './middleware/auth.ts';
 import { AuthQuery } from './query.ts';
 import { COOKIE_SID_NAME, SessionService } from './services/session.ts';
 import { authTables } from './tables.ts';
+import { Password } from './utils/password.ts';
 
 export default class authApi extends Api {
   query = new AuthQuery(this.db);
 
   session = new SessionService(this.core);
   authMiddleware = new AuthMiddleware(this.core);
+  password = new Password('segredo');
 
   handlers = {
-    postUser: (req, res) => {
+    postUser: async (req, res) => {
       const { name, username, email, password } = req.body;
-      const password_hash = password;
+
+      const emailExists = this.query.selectUser({
+        key: 'email',
+        value: email,
+      });
+      if (!emailExists) {
+        throw new RouteError(409, 'Email existente');
+      }
+
+      const usernameExists = this.query.selectUser({
+        key: 'username',
+        value: username,
+      });
+      if (!usernameExists) {
+        throw new RouteError(409, 'Username existente');
+      }
+
+      const password_hash = await this.password.hash(password);
+
       const writeResult = this.query.insertUser({
         name,
         username,
@@ -28,17 +48,16 @@ export default class authApi extends Api {
     },
     postLogin: async (req, res) => {
       const { email, password } = req.body;
+      const user = this.query.selectUser({ key: 'email', value: email });
+      if (!user) {
+        throw new RouteError(404, 'Email ou senha incorretos');
+      }
 
-      const user = this.db
-        .query(
-          /*sql*/ `
-        SELECT "id", "password_hash"
-        FROM users WHERE email = ?
-      `,
-        )
-        .get(email) as { id: number; password_hash: string } | undefined;
-
-      if (!user || user.password_hash !== password) {
+      const validPassword = await this.password.verify(
+        password,
+        user.password_hash,
+      );
+      if (!validPassword) {
         throw new RouteError(404, 'Email ou senha incorretos');
       }
 
