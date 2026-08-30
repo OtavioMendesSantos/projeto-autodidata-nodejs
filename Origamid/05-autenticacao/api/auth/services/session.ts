@@ -39,7 +39,6 @@ export class SessionService extends CoreProvider {
 
     return { cookie };
   }
-
   async validate(sid: string) {
     const now = Date.now();
     const sid_hash = sha256(sid);
@@ -55,7 +54,7 @@ export class SessionService extends CoreProvider {
     let expires_ms = session.expires_ms;
 
     if (now >= session.expires_ms) {
-      this.query.revokeSession({ key: 'sid_hash', sid_hash });
+      this.query.revokeSession({ sid_hash });
       return {
         valid: false,
         cookie: sidCookie('', 0),
@@ -73,7 +72,7 @@ export class SessionService extends CoreProvider {
 
     const user = this.query.selectUserRole({ user_id: session.user_id });
     if (!user) {
-      this.query.revokeSession({ key: 'sid_hash', sid_hash });
+      this.query.revokeSession({ sid_hash });
       return {
         valid: false,
         cookie: sidCookie('', 0),
@@ -95,11 +94,14 @@ export class SessionService extends CoreProvider {
     try {
       if (sid) {
         const sid_hash = sha256(sid);
-        this.query.revokeSession({ key: 'sid_hash', sid_hash });
+        this.query.revokeSession({ sid_hash });
       }
     } catch {}
     return {
       cookie,
     };
+  }
+  async inValidateAll(user_id: number) {
+    this.query.revokeSessions({ user_id });
   }
 }

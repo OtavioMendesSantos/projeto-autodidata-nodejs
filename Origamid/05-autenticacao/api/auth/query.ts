@@ -47,7 +47,7 @@ export class AuthQuery extends Query {
     value,
   }: {
     key: 'email' | 'username' | 'id';
-    value: string;
+    value: string | number;
   }) {
     if (key !== 'email' && key !== 'username' && key !== 'id')
       throw new Error('Key inválida.');
@@ -56,7 +56,7 @@ export class AuthQuery extends Query {
       .query(
         /*sql*/ `
             SELECT "id", "password_hash"
-            FROM users WHERE ${key} = ?
+            FROM users WHERE "${key}" = ?
           `,
       )
       .get(value) as { id: number; password_hash: string } | undefined;
@@ -86,24 +86,34 @@ export class AuthQuery extends Query {
       .get(sid_hash) as (SessionData & { expires_ms: number }) | undefined;
   }
   revokeSession({
-    key,
-    sid_hash,
+    sid_hash: sid_hash,
   }: {
-    key: 'user_id' | 'sid_hash';
     sid_hash: Buffer;
   }) {
-    if (key !== 'user_id' && key !== 'sid_hash')
-      throw new Error('Key inválida.');
-
     return this.db
       .query(
         /*sql*/ `
       UPDATE "sessions" 
       SET "revoked" = 1
-      WHERE ${key} = ?
+      WHERE "sid_hash" = ?
       `,
       )
       .run(sid_hash);
+  }
+  revokeSessions({
+    user_id,
+  }: {
+    user_id: number;
+  }) {
+    return this.db
+      .query(
+        /*sql*/ `
+      UPDATE "sessions" 
+      SET "revoked" = 1
+      WHERE "user_id" = ?
+      `,
+      )
+      .run(user_id);
   }
   updateSessionExpires({
     expires_ms,
@@ -130,5 +140,27 @@ export class AuthQuery extends Query {
       `,
       )
       .get(user_id) as { role: UserRole } | undefined;
+  }
+  updateUser({
+    user_id,
+    key,
+    value,
+  }: {
+    user_id: number;
+    key: 'password_hash' | 'email' | 'name';
+    value: string;
+  }) {
+    if (key !== 'password_hash' && key !== 'name' && key !== 'email')
+      throw new Error('Key inválida.');
+
+    return this.db
+      .query(
+        /*sql*/ `
+      UPDATE "users"
+      SET ${key} = ?
+      WHERE "id" = ?
+    `,
+      )
+      .run(value, user_id);
   }
 }

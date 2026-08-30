@@ -21,7 +21,8 @@ export default class authApi extends Api {
         key: 'email',
         value: email,
       });
-      if (!emailExists) {
+
+      if (emailExists) {
         throw new RouteError(409, 'Email existente');
       }
 
@@ -29,7 +30,7 @@ export default class authApi extends Api {
         key: 'username',
         value: username,
       });
-      if (!usernameExists) {
+      if (usernameExists) {
         throw new RouteError(409, 'Username existente');
       }
 
@@ -50,15 +51,14 @@ export default class authApi extends Api {
       const { email, password } = req.body;
       const user = this.query.selectUser({ key: 'email', value: email });
       if (!user) {
-        throw new RouteError(404, 'Email ou senha incorretos');
+        throw new RouteError(400, 'Email ou senha incorretos');
       }
-
       const validPassword = await this.password.verify(
         password,
         user.password_hash,
       );
       if (!validPassword) {
-        throw new RouteError(404, 'Email ou senha incorretos');
+        throw new RouteError(400, 'Email ou senha incorretos');
       }
 
       const { cookie } = await this.session.create({
@@ -83,6 +83,50 @@ export default class authApi extends Api {
       res.setHeader('Vary', 'Cookie');
       res.status(204).json({ title: 'Logout' });
     },
+    updatePassword: async (req, res) => {
+      const { password, newPassword } = req.body;
+console.log(password, req.body)
+      const session = req.session;
+      if (!session) throw new RouteError(401, 'Não autenticado');
+
+      const user = this.query.selectUser({ key: 'id', value: session.userId });
+      if (!user) throw new RouteError(404, 'Usuário não encontrado');
+
+      const isValidPassword = await this.password.verify(
+        password,
+        user.password_hash,
+      );
+      if (!isValidPassword) throw new RouteError(400, 'Senha atual incorreta');
+
+      const isSamePass = await this.password.verify(
+        newPassword,
+        user.password_hash,
+      );
+      if (password === newPassword || isSamePass)
+        throw new RouteError(
+          401,
+          'A nova senha não pode ser igual à senha antiga',
+        );
+
+      const newPasswordHash = await this.password.hash(newPassword);
+      const writeResult = this.query.updateUser({
+        user_id: session.userId,
+        key: 'password_hash',
+        value: newPasswordHash,
+      });
+      if (!writeResult.changes) {
+        throw new RouteError(400, 'Erro ao atualizar senha');
+      }
+
+      this.session.inValidateAll(session.userId);
+      const { cookie } = await this.session.create({
+        userId: session.userId,
+        ip: req.ip,
+        ua: req.headers['user-agent'] ?? '',
+      });
+      res.setCookie(cookie);
+      res.status(200).json({ title: 'Senha alterada com sucesso' });
+    },
   } satisfies Api['handlers'];
 
   tables() {
@@ -94,6 +138,9 @@ export default class authApi extends Api {
     this.router.post('/auth/login', this.handlers.postLogin);
     this.router.delete('/auth/logout', this.handlers.deleteSession);
     this.router.get('/auth/session', this.handlers.getSession, [
+      this.authMiddleware.guard('user'),
+    ]);
+    this.router.put('/auth/update/password', this.handlers.updatePassword, [
       this.authMiddleware.guard('user'),
     ]);
   }

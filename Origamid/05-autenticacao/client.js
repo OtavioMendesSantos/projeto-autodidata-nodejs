@@ -212,9 +212,9 @@ const functions = {
   },
   async postUser() {
     const user = {
-      name: 'Bárbara',
-      username: 'barbara',
-      email: 'barbara@gmail.com',
+      name: 'Otávio',
+      username: 'otavio',
+      email: 'otavio@gmail.com',
       password: '123123',
     };
     const response = await fetch(BASE_URL + '/auth/user', {
