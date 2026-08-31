@@ -29,6 +29,19 @@ type SessionCreate = Omit<SessionData, 'created' | 'revoked' | 'expires'> & {
   expires_ms: number;
 };
 
+type ResetData = {
+  token_hash: Buffer;
+  user_id: number;
+  created: number;
+  expires: number;
+  ip: string;
+  ua: string;
+};
+
+type ResetCreate = Omit<ResetData, 'created' | 'expires'> & {
+  expires_ms: number;
+};
+
 export class AuthQuery extends Query {
   insertUser({ name, username, email, role, password_hash }: UserCreate) {
     return this.db
@@ -55,11 +68,13 @@ export class AuthQuery extends Query {
     return this.db
       .query(
         /*sql*/ `
-            SELECT "id", "password_hash"
+            SELECT "id", "password_hash", "email"
             FROM users WHERE "${key}" = ?
           `,
       )
-      .get(value) as { id: number; password_hash: string } | undefined;
+      .get(value) as
+      | { id: number; password_hash: string; email: string }
+      | undefined;
   }
   insertSession({ sid_hash, user_id, expires_ms, ip, ua }: SessionCreate) {
     return this.db
@@ -85,11 +100,7 @@ export class AuthQuery extends Query {
       )
       .get(sid_hash) as (SessionData & { expires_ms: number }) | undefined;
   }
-  revokeSession({
-    sid_hash: sid_hash,
-  }: {
-    sid_hash: Buffer;
-  }) {
+  revokeSession({ sid_hash: sid_hash }: { sid_hash: Buffer }) {
     return this.db
       .query(
         /*sql*/ `
@@ -100,11 +111,7 @@ export class AuthQuery extends Query {
       )
       .run(sid_hash);
   }
-  revokeSessions({
-    user_id,
-  }: {
-    user_id: number;
-  }) {
+  revokeSessions({ user_id }: { user_id: number }) {
     return this.db
       .query(
         /*sql*/ `
@@ -162,5 +169,17 @@ export class AuthQuery extends Query {
     `,
       )
       .run(value, user_id);
+  }
+  insertReset({ token_hash, user_id, expires_ms, ip, ua }: ResetCreate) {
+    return this.db
+      .query(
+        /*sql*/ `
+      INSERT OR IGNORE INTO "resets"
+        ("token_hash","user_id","expires","ip","ua")
+      VALUES
+        (?,?,?,?,?)
+    `,
+      )
+      .run(token_hash, user_id, Math.floor(expires_ms / 1000), ip, ua);
   }
 }
