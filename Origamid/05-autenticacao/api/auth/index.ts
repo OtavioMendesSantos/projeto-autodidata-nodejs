@@ -149,7 +149,23 @@ export default class authApi extends Api {
       console.log(mailContent);
       res.status(200).json({ title: 'Verifique seu email' });
     },
-    passwordReset: async (req, res) => {},
+    passwordReset: async (req, res) => {
+      const { new_password, token } = req.body;
+      const reset = await this.session.validateToken(token);
+      if (!reset) {
+        throw new RouteError(400, 'Token inválido');
+      }
+      const new_password_hash = await this.password.hash(new_password);
+      const writeResult = this.query.updateUser({
+        key: 'password_hash',
+        value: new_password_hash,
+        user_id: reset.user_id,
+      });
+      if(!writeResult.changes){
+        throw new RouteError(400, 'Erro ao atualizar senha');
+      }
+      res.status(200).json({title: "Senha atualizada com sucesso"})
+    },
   } satisfies Api['handlers'];
 
   tables() {

@@ -95,7 +95,7 @@ export class AuthQuery extends Query {
       SELECT 
         "s".*, "s"."expires" * 1000 as "expires_ms" 
       FROM "sessions" as "s"
-        WHERE "s"."sid_hash" = ?
+      WHERE "s"."sid_hash" = ?
       `,
       )
       .get(sid_hash) as (SessionData & { expires_ms: number }) | undefined;
@@ -181,5 +181,27 @@ export class AuthQuery extends Query {
     `,
       )
       .run(token_hash, user_id, Math.floor(expires_ms / 1000), ip, ua);
+  }
+  selectReset({ token_hash }: { token_hash: Buffer }) {
+    return this.db
+      .query(
+        /*sql*/ `
+      SELECT 
+        "r".*, "r"."expires" * 1000 as "expires_ms" 
+      FROM "resets" as "r"
+      WHERE "r"."token_hash" = ?
+      `,
+      )
+      .get(token_hash) as (ResetData & { expires_ms: number }) | undefined;
+  }
+  deleteSessions({ user_id }: { user_id: number }) {
+    return this.db
+      .query(
+        /*sql*/ `
+      DELETE FROM "resets"
+      WHERE "user_id" = ?
+      `,
+      )
+      .run(user_id);
   }
 }
