@@ -1,13 +1,24 @@
+//** trim e não aceita string vazia*/
 function string(x: unknown) {
   if (typeof x !== 'string' || x.trim().length === 0) return undefined;
-  return x;
+  const s = x.trim();
+  if (s.length === 0) return undefined;
+  return s;
 }
 
+//** valida e se possível converte para número*/
 function number(x: unknown) {
-  if (typeof x === 'number') return Number.isFinite(x) ? x : undefined;
+  if (typeof x === 'number') {
+    return Number.isFinite(x) ? x : undefined;
+  }
+  if (typeof x === 'string' && x.trim().length !== 0) {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : undefined;
+  }
   return undefined;
 }
 
+//** aceita valores boolean like */
 function boolean(x: unknown) {
   if (typeof x === 'boolean') return x;
   if (x === true || x === 'true' || x === 1 || x === '1' || x === 'on')
@@ -15,6 +26,13 @@ function boolean(x: unknown) {
   if (x === false || x === 'false' || x === 0 || x === '0' || x === 'off')
     return false;
   return undefined;
+}
+
+/** aceita apenas objetos literais */
+function object(x: unknown): Record<string, unknown> | undefined {
+  return typeof x === 'object' && x !== null && !Array.isArray(x)
+    ? x as Record<string, unknown>
+    : undefined;
 }
 
 // console.log(string(' a'));
@@ -25,33 +43,11 @@ function boolean(x: unknown) {
 // formatar
 // normalizar
 // escapar
-// sanitizar 
-
-function cpf(x: string) {
-  return x.replace(/\D+/g, '');
-}
-
-cpf('123.456.789-09');
-
-const a = `é`.normalize('NFC');
-const b = `e\u0301`.normalize('NFC');
-
-console.log(a === b, a, b);
-
-const nome = ' Otávio '.trim();
-
-function escapeHtml(x: string) {
-  return x
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
+// sanitizar
 
 function email(x: string) {
   return /^[^@]+@[^@]+$/.test(x) ? x : undefined;
 }
 
-console.log(email('teste@exemplo.com'));
-console.log(email('testeexemplo.com'));
+// console.log(email('teste@exemplo.com'));
+// console.log(email('testeexemplo.com'));
