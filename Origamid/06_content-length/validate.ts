@@ -40,14 +40,23 @@ function object(x: unknown): Record<string, unknown> | undefined {
 // console.log(boolean('true'));
 // console.log(boolean('false'));
 
-// formatar
-// normalizar
-// escapar
-// sanitizar
+const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
 
-function email(x: string) {
-  return /^[^@]+@[^@]+$/.test(x) ? x : undefined;
+//** valida email */
+function email(x: unknown) {
+  const s = string(x)?.toLowerCase();
+  if (!s) return undefined;
+  return emailRegex.test(s) ? x : undefined;
 }
 
-// console.log(email('teste@exemplo.com'));
-// console.log(email('testeexemplo.com'));
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+
+//** minimo 10, maximo 256 caracteres, deve conter pelo menos uma letra minuscula, uma letra maiuscula e um numero */
+function password(x: unknown) {
+  if (typeof x !== 'string') return undefined;
+  if (x.length < 10 || x.length > 256) return undefined;
+  return passwordRegex.test(x) ? x : undefined;
+}
+
+console.log(email('teste@exemplo.com'));
+console.log(email('testeexemplo.com'));
