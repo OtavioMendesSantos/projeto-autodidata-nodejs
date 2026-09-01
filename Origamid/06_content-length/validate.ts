@@ -48,3 +48,10 @@ function escapeHtml(x: string) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 }
+
+function email(x: string) {
+  return /^[^@]+@[^@]+$/.test(x) ? x : undefined;
+}
+
+console.log(email('teste@exemplo.com'));
+console.log(email('testeexemplo.com'));
