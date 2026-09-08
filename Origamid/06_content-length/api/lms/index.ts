@@ -15,6 +15,8 @@ export default class lmsApi extends Api {
 
   handlers = {
     postCourse: (req, res) => {
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+
       const { slug, title, description, lessons, hours } = {
         slug: v.string(req.body.slug),
         title: v.string(req.body.title),
@@ -41,6 +43,8 @@ export default class lmsApi extends Api {
       });
     },
     postLesson: (req, res) => {
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+
       const {
         courseSlug,
         slug,
@@ -109,7 +113,9 @@ export default class lmsApi extends Api {
         .json({ title: 'Curso encontrado', course, lessons, completed });
     },
     resetCourse: (req, res) => {
-      const userId = 1;
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+      const userId = req.session.userId;
+
       const { courseId } = { courseId: v.number(req.body.courseId) };
       const writeResult = this.query.deleteLessonsCompleted({
         userId,
@@ -120,6 +126,9 @@ export default class lmsApi extends Api {
       res.status(200).json({ title: 'Curso resetado' });
     },
     getLesson: (req, res) => {
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+      const userId = req.session.userId;
+
       const { courseSlug, lessonSlug } = {
         courseSlug: v.string(req.params.courseSlug),
         lessonSlug: v.string(req.params.lessonSlug),
@@ -134,7 +143,6 @@ export default class lmsApi extends Api {
       const prev = i === 0 ? null : nav.at(i - 1)?.slug;
       const next = nav.at(i + 1)?.slug ?? null;
 
-      const userId = 1;
       let completed = '';
       if (userId) {
         const lessonCompleted = this.query.selectLessonCompleted({
@@ -150,7 +158,9 @@ export default class lmsApi extends Api {
       });
     },
     completeLesson: (req, res) => {
-      const userId = 1;
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+      const userId = req.session.userId;
+
       const { courseId, lessonId } = {
         courseId: v.number(req.body.courseId),
         lessonId: v.number(req.body.lessonId),
@@ -166,7 +176,7 @@ export default class lmsApi extends Api {
 
       const progress = this.query.selectProgress({ courseId, userId });
       const incompleteLessons = progress.filter((l) => !l.completed);
-      console.log(incompleteLessons);
+
       if (progress.length > 0 && incompleteLessons.length === 0) {
         const certificate = this.query.insertCertificate({ userId, courseId });
         if (!certificate) {
@@ -181,7 +191,9 @@ export default class lmsApi extends Api {
       res.status(201).json({ title: 'Aula concluída', certificate: null });
     },
     getCertificates: (req, res) => {
-      const userId = 1;
+      if (!req.session) throw new RouteError(401, 'Não autorizado.');
+      const userId = req.session.userId;
+
       const certificates = this.query.selectCertificates({ userId });
       if (!certificates.length) {
         throw new RouteError(404, 'Nenhum certificado encontrado');
@@ -203,19 +215,30 @@ export default class lmsApi extends Api {
   } satisfies Api['handlers'];
 
   routes() {
-    this.router.post('/lms/course', this.handlers.postCourse);
+    this.router.post('/lms/course', this.handlers.postCourse, [
+      this.authMiddleware.guard('admin'),
+    ]);
     this.router.get('/lms/courses', this.handlers.getCourses);
     this.router.get('/lms/course/:slug', this.handlers.getCourse, [
       this.authMiddleware.optional,
     ]);
-    this.router.delete('/lms/course/reset', this.handlers.resetCourse);
-    this.router.post('/lms/lesson', this.handlers.postLesson);
+    this.router.delete('/lms/course/reset', this.handlers.resetCourse, [
+      this.authMiddleware.guard('user'),
+    ]);
+    this.router.post('/lms/lesson', this.handlers.postLesson, [
+      this.authMiddleware.guard('admin'),
+    ]);
     this.router.get(
       '/lms/lesson/:courseSlug/:lessonSlug',
       this.handlers.getLesson,
+      [this.authMiddleware.optional],
     );
-    this.router.post('/lms/lesson/complete', this.handlers.completeLesson);
-    this.router.get('/lms/certificates', this.handlers.getCertificates);
+    this.router.post('/lms/lesson/complete', this.handlers.completeLesson, [
+      this.authMiddleware.guard('user'),
+    ]);
+    this.router.get('/lms/certificates', this.handlers.getCertificates, [
+      this.authMiddleware.guard('user'),
+    ]);
     this.router.get('/lms/certificate/:id', this.handlers.getCertificate);
   }
 }
