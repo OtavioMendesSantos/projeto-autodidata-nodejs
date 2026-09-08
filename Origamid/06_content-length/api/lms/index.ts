@@ -1,5 +1,6 @@
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
+import { v } from '../../core/utils/validate.ts';
 import { AuthMiddleware } from '../auth/middleware/auth.ts';
 import { LmsQuery } from './query.ts';
 import { lmsTables } from './tables.ts';
@@ -8,9 +9,19 @@ export default class lmsApi extends Api {
   query = new LmsQuery(this.db);
   authMiddleware = new AuthMiddleware(this.core);
 
+  tables() {
+    this.db.exec(lmsTables);
+  }
+
   handlers = {
     postCourse: (req, res) => {
-      const { slug, title, description, lessons, hours } = req.body;
+      const { slug, title, description, lessons, hours } = {
+        slug: v.string(req.body.slug),
+        title: v.string(req.body.title),
+        description: v.string(req.body.description),
+        lessons: v.number(req.body.lessons),
+        hours: v.number(req.body.hours),
+      };
 
       const writeResult = this.query.insertCourse({
         slug,
@@ -39,7 +50,16 @@ export default class lmsApi extends Api {
         description,
         order,
         free,
-      } = req.body;
+      } = {
+        courseSlug: v.string(req.body.courseSlug),
+        slug: v.string(req.body.slug),
+        title: v.string(req.body.title),
+        seconds: v.number(req.body.seconds),
+        video: v.string(req.body.video),
+        description: v.string(req.body.description),
+        order: v.number(req.body.order),
+        free: v.number(req.body.free),
+      };
 
       const writeResult = this.query.insertLesson({
         courseSlug,
@@ -90,7 +110,7 @@ export default class lmsApi extends Api {
     },
     resetCourse: (req, res) => {
       const userId = 1;
-      const { courseId } = req.body;
+      const { courseId } = { courseId: v.number(req.body.courseId) };
       const writeResult = this.query.deleteLessonsCompleted({
         userId,
         courseId,
@@ -100,7 +120,10 @@ export default class lmsApi extends Api {
       res.status(200).json({ title: 'Curso resetado' });
     },
     getLesson: (req, res) => {
-      const { courseSlug, lessonSlug } = req.params;
+      const { courseSlug, lessonSlug } = {
+        courseSlug: v.string(req.params.courseSlug),
+        lessonSlug: v.string(req.params.lessonSlug),
+      };
       const lesson = this.query.selectLesson({ courseSlug, lessonSlug });
       const nav = this.query.selectLessonNav({ courseSlug, lessonSlug });
       if (!lesson) {
@@ -128,7 +151,10 @@ export default class lmsApi extends Api {
     },
     completeLesson: (req, res) => {
       const userId = 1;
-      const { courseId, lessonId } = req.body;
+      const { courseId, lessonId } = {
+        courseId: v.number(req.body.courseId),
+        lessonId: v.number(req.body.lessonId),
+      };
 
       const writeResult = this.query.insertLessonCompleted({
         courseId,
@@ -175,10 +201,6 @@ export default class lmsApi extends Api {
         .json({ title: 'Certificado encontrado com sucesso', certificate });
     },
   } satisfies Api['handlers'];
-
-  tables() {
-    this.db.exec(lmsTables);
-  }
 
   routes() {
     this.router.post('/lms/course', this.handlers.postCourse);

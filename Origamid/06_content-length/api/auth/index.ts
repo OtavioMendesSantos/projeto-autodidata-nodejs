@@ -1,5 +1,6 @@
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
+import { v } from '../../core/utils/validate.ts';
 import { AuthMiddleware } from './middleware/auth.ts';
 import { AuthQuery } from './query.ts';
 import { COOKIE_SID_NAME, SessionService } from './services/session.ts';
@@ -15,7 +16,12 @@ export default class authApi extends Api {
 
   handlers = {
     postUser: async (req, res) => {
-      const { name, username, email, password } = req.body;
+      const { name, username, email, password } = {
+        name: v.string(req.body.name),
+        username: v.string(req.body.username),
+        email: v.email(req.body.email),
+        password: v.password(req.body.password),
+      };
 
       const emailExists = this.query.selectUser({
         key: 'email',
@@ -48,7 +54,10 @@ export default class authApi extends Api {
       res.status(201).json({ title: 'Usuário criado' });
     },
     postLogin: async (req, res) => {
-      const { email, password } = req.body;
+      const { email, password } = {
+        email: v.email(req.body.email),
+        password: v.password(req.body.password),
+      };
       const user = this.query.selectUser({ key: 'email', value: email });
       if (!user) {
         throw new RouteError(400, 'Email ou senha incorretos');
@@ -84,9 +93,13 @@ export default class authApi extends Api {
       res.status(204).json({ title: 'Logout' });
     },
     passwordUpdate: async (req, res) => {
-      const { password, newPassword } = req.body;
       const session = req.session;
       if (!session) throw new RouteError(401, 'Não autenticado');
+
+      const { newPassword, password } = {
+        newPassword: v.password(req.body.newPassword),
+        password: v.password(req.body.password),
+      };
 
       const user = this.query.selectUser({ key: 'id', value: session.userId });
       if (!user) throw new RouteError(404, 'Usuário não encontrado');
@@ -113,9 +126,8 @@ export default class authApi extends Api {
         key: 'password_hash',
         value: newPasswordHash,
       });
-      if (!writeResult.changes) {
+      if (!writeResult.changes)
         throw new RouteError(400, 'Erro ao atualizar senha');
-      }
 
       this.session.inValidateAll(session.userId);
       const { cookie } = await this.session.create({
@@ -127,7 +139,10 @@ export default class authApi extends Api {
       res.status(200).json({ title: 'Senha alterada com sucesso' });
     },
     passwordForgot: async (req, res) => {
-      const { email } = req.body;
+      const { email } = {
+        email: v.email(req.body.email),
+      };
+
       const user = this.query.selectUser({
         key: 'email',
         value: email,
@@ -150,7 +165,11 @@ export default class authApi extends Api {
       res.status(200).json({ title: 'Verifique seu email' });
     },
     passwordReset: async (req, res) => {
-      const { new_password, token } = req.body;
+      const { new_password, token } = {
+        new_password: v.password(req.body.new_password),
+        token: v.string(req.body.token),
+      };
+
       const reset = await this.session.validateToken(token);
       if (!reset) {
         throw new RouteError(400, 'Token inválido');
@@ -161,10 +180,10 @@ export default class authApi extends Api {
         value: new_password_hash,
         user_id: reset.user_id,
       });
-      if(!writeResult.changes){
+      if (!writeResult.changes) {
         throw new RouteError(400, 'Erro ao atualizar senha');
       }
-      res.status(200).json({title: "Senha atualizada com sucesso"})
+      res.status(200).json({ title: 'Senha atualizada com sucesso' });
     },
   } satisfies Api['handlers'];
 
