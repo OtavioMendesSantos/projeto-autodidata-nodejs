@@ -3,6 +3,7 @@ import authApi from './api/auth/index.ts';
 import lmsApi from './api/lms/index.ts';
 import { logger } from './core/middleware/logger.ts';
 import { readFile } from 'node:fs/promises';
+import { rateLimit } from './core/middleware/rate-limit.ts';
 
 const core = new Core();
 // core.router.use([logger]);
@@ -15,5 +16,9 @@ core.router.get('/', async (req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.status(200).end(index);
 });
+
+core.router.get('/limit', (req, res) => {
+  res.status(200).end("ok")
+}, [rateLimit(3000, 5)]);
 
 core.init();

@@ -258,6 +258,11 @@ const functions = {
     const body = await response.json('');
     console.table(body);
   },
+  async atack() {
+    for (let i = 0; i < 10; i++) {
+      fetch(BASE_URL + '/limit');
+    }
+  },
 };
 
 const targetFunction = functions[process.argv[2]];
