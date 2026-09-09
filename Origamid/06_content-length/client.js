@@ -259,8 +259,8 @@ const functions = {
     console.table(body);
   },
   async atack() {
-    for (let i = 0; i < 10; i++) {
-      fetch(BASE_URL + '/limit');
+    for (let i = 0; i < 101; i++) {
+      fetch(BASE_URL + '/');
     }
   },
 };

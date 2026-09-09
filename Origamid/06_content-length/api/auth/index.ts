@@ -1,3 +1,4 @@
+import { rateLimit } from '../../core/middleware/rate-limit.ts';
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { v } from '../../core/utils/validate.ts';
@@ -192,14 +193,22 @@ export default class authApi extends Api {
   }
 
   routes() {
-    this.router.post('/auth/user', this.handlers.postUser);
-    this.router.post('/auth/login', this.handlers.postLogin);
+    this.router.post('/auth/user', this.handlers.postUser, [
+      rateLimit(30000, 15),
+    ]);
+    this.router.post('/auth/login', this.handlers.postLogin, [
+      rateLimit(30000, 5),
+    ]);
     this.router.delete('/auth/logout', this.handlers.deleteSession);
     this.router.get('/auth/session', this.handlers.getSession, [
       this.authMiddleware.guard('user'),
     ]);
-    this.router.post('/auth/password/forgot', this.handlers.passwordForgot);
-    this.router.post('/auth/password/reset', this.handlers.passwordReset);
+    this.router.post('/auth/password/forgot', this.handlers.passwordForgot, [
+      rateLimit(30000, 5),
+    ]);
+    this.router.post('/auth/password/reset', this.handlers.passwordReset, [
+      rateLimit(30000, 5),
+    ]);
     this.router.put('/auth/password/update', this.handlers.passwordUpdate, [
       this.authMiddleware.guard('user'),
     ]);
