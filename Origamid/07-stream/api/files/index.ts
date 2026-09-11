@@ -1,4 +1,4 @@
-import { createReadStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -13,7 +13,7 @@ export default class filesApi extends Api {
       const name = v.file(req.params.name);
       const filePath = `./files/${name}`;
       const ext = path.extname(name);
-      
+
       let st;
       try {
         st = await stat(filePath);
@@ -44,9 +44,18 @@ export default class filesApi extends Api {
       const file = createReadStream(filePath);
       await pipeline(file, res);
     },
+    uploadFile: async (req, res) => {
+      const name = v.file(req.headers['x-filename']);
+      const writeStream = createWriteStream(`./files/${name}`);
+      
+      await pipeline(req, writeStream);
+      res.status(200);
+      res.end('ok')
+    },
   } satisfies Api['handlers'];
 
   routes(): void {
     this.router.get('/files/:name', this.handlers.sendFile);
+    this.router.post('/files', this.handlers.uploadFile);
   }
 }
