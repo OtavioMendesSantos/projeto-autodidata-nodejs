@@ -1,12 +1,13 @@
-import { readFile } from 'node:fs/promises';
 import { Api } from '../../core/utils/abstract.ts';
 import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
+import { v } from '../../core/utils/validate.ts';
 
 export default class filesApi extends Api {
   handlers = {
     sendFile: async (req, res) => {
-      const filePath = `./files/${req.params.name}`;
+      const name = v.file(req.params.name);
+      const filePath = `./files/${name}`;
       const file = createReadStream(filePath);
       await pipeline(file, res);
     },
