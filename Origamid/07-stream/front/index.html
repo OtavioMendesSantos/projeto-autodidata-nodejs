@@ -153,7 +153,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/octet-stream',
-              'x-filename': file.name,
+              'x-filename': file.name.replace(' ', '_'),
             },
             body: file,
           });

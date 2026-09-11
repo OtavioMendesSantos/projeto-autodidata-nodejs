@@ -1,17 +1,20 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { rename, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { v } from '../../core/utils/validate.ts';
 import { checkETag, mimeType } from './utils.ts';
+import { randomUUID } from 'node:crypto';
 
+const MAX_BYTES = 200 * 1024 * 1024; //200Mb
+const FILES_PATH = './files';
 export default class filesApi extends Api {
   handlers = {
     sendFile: async (req, res) => {
       const name = v.file(req.params.name);
-      const filePath = `./files/${name}`;
+      const filePath = path.join(FILES_PATH, name);
       const ext = path.extname(name);
 
       let st;
@@ -45,12 +48,36 @@ export default class filesApi extends Api {
       await pipeline(file, res);
     },
     uploadFile: async (req, res) => {
+      if (req.headers['content-type'] !== 'application/octet-stream') {
+        throw new RouteError(415, 'Use application');
+      }
+
+      const contentLength = Number(req.headers['content-length']);
+      if (!Number.isInteger(contentLength)) {
+        throw new RouteError(400, 'Content length inválido');
+      }
+
+      if (contentLength > MAX_BYTES) {
+        throw new RouteError(400, 'Corpo grande');
+      }
+
       const name = v.file(req.headers['x-filename']);
-      const writeStream = createWriteStream(`./files/${name}`);
-      
-      await pipeline(req, writeStream);
-      res.status(200);
-      res.end('ok')
+      const now = Date.now();
+      const ext = path.extname(name);
+      const finalName = `${name.replace(ext, '')}-${now}${ext}`;
+      const tempPath = path.join(FILES_PATH, `${randomUUID()}.temp`);
+      const writePath = path.join(FILES_PATH, finalName);
+      const writeStream = createWriteStream(tempPath, { flags: 'wx' });
+      try {
+        await pipeline(req, writeStream);
+
+        await rename(tempPath, writePath);
+        res.status(201).end('ok');
+      } catch (e) {
+        throw new RouteError(500, 'Ocorreu um erro');
+      } finally {
+        await rm(tempPath, { force: true }).catch(() => {});
+      }
     },
   } satisfies Api['handlers'];
 

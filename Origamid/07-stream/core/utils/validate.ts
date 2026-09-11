@@ -55,7 +55,7 @@ function password(x: unknown) {
   return passwordRegex.test(x) ? x : undefined;
 }
 
-const fileRegex = /^(?!\.)[A-Za-z0-9 ._-]+$/;
+const fileRegex = /^(?!\.)[A-Za-z0-9._-]+$/;
 
 /** Verifica se o nome do arquivo começa com ponto ou possui caracteres especiais */
 function file(x: unknown) {
