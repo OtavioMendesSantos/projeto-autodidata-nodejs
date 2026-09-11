@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 import { Api } from '../../core/utils/abstract.ts';
 import { RouteError } from '../../core/utils/route-error.ts';
 import { v } from '../../core/utils/validate.ts';
-import { checkETag, mimeType } from './utils.ts';
+import { checkETag, limitBytes, mimeType } from './utils.ts';
 import { randomUUID } from 'node:crypto';
 
 const MAX_BYTES = 200 * 1024 * 1024; //200Mb
@@ -69,12 +69,15 @@ export default class filesApi extends Api {
       const writePath = path.join(FILES_PATH, finalName);
       const writeStream = createWriteStream(tempPath, { flags: 'wx' });
       try {
-        await pipeline(req, writeStream);
-
+        await pipeline(req, limitBytes(MAX_BYTES), writeStream);
         await rename(tempPath, writePath);
         res.status(201).end('ok');
-      } catch (e) {
-        throw new RouteError(500, 'Ocorreu um erro');
+      } catch (err) {
+        if (err instanceof RouteError) {
+          throw new RouteError(err.status, err.message);
+        } else {
+          throw new RouteError(500, 'Ocorreu um erro');
+        }
       } finally {
         await rm(tempPath, { force: true }).catch(() => {});
       }

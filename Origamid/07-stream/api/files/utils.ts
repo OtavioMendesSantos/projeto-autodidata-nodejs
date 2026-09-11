@@ -1,3 +1,6 @@
+import { Transform } from 'node:stream';
+import { RouteError } from '../../core/utils/route-error.ts';
+
 export const mimeType: Record<string, string> = {
   '.ico': 'image/x-icon',
   '.html': 'text/html',
@@ -20,4 +23,17 @@ export function checkETag(match: string | undefined, eTag: string) {
   if (!match) return false;
   const tags = match.split(',').map((s) => s.trim());
   return tags.includes(eTag);
+}
+
+export function limitBytes(max: number) {
+  let size = 0;
+  return new Transform({
+    transform(chunk, _enc, next) {
+      size += chunk.length;
+      if (size > max) {
+        return next(new RouteError(413, 'Corpo grande'));
+      }
+      next(null, chunk);
+    },
+  });
 }
