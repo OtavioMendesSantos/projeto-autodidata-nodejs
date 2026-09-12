@@ -362,6 +362,20 @@
       [data-role].ativo {
         display: block;
       }
+      .ok,
+      .fail {
+        padding: 0.5rem 1rem;
+        animation: slideIn 0.3s ease-out forwards;
+        border-radius: 100px;
+        width: max-content;
+        background: #211100;
+        color: #ffca16;
+        grid-column: 2;
+      }
+      .ok {
+        background: #0c281c;
+        color: #3dd78c;
+      }
     </style>
     <script>
       const routes = document.querySelectorAll('section[data-role]');
@@ -382,14 +396,16 @@
       async function getUser() {
         user = 'public';
         try {
-          const response = fetch('/auth/session');
+          const response = await fetch('/auth/session');
           const body = await response.json();
           if (!response.ok) throw new Error();
+          user = body.role;
           return user;
-        } catch {
+        } catch (err) {
+          console.error(err);
           return user;
-        } finally{
-          handleUserNav()
+        } finally {
+          handleUserNav();
         }
       }
 
@@ -410,6 +426,49 @@
       }
       window.addEventListener('hashchange', router);
       window.addEventListener('DOMContentLoaded', router);
+
+      // FORMULÁRIOS
+      async function sendForm(method, url, id, callback) {
+        const form = document.querySelector('#' + id + ' form');
+        form?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = new FormData(form);
+          // console.log(Object.fromEntries(data));
+          let response;
+          let body;
+          const badge = document.createElement('div');
+          try {
+            response = await fetch(url, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(Object.fromEntries(data)),
+            });
+            body = await response.json();
+            if (!response.ok) throw new Error();
+            if (typeof callback === 'function') callback(response, body);
+            badge.innerText = `${response.status}`;
+            badge.classList.add('ok');
+          } catch {
+            badge.innerText = `${response.status} - ${body?.title}`;
+            badge.classList.add('fail');
+          } finally {
+            form.append(badge);
+            setTimeout(() => badge.remove(), 3000);
+          }
+        });
+      }
+
+      sendForm('POST', '/auth/login', 'login', async () => {
+        user = await getUser();
+        if (user === 'user') location.hash = '/cursos';
+        if (user === 'admin') location.hash = '/criar-curso';
+      });
+      sendForm('POST', '/auth/user', 'criar-conta', (res, bod) => {
+        setTimeout(() => (location.hash = '/login'), 1000);
+        console.log(res, bod);
+      });
     </script>
   </body>
 </html>

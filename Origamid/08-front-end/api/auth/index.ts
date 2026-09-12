@@ -83,7 +83,7 @@ export default class authApi extends Api {
       if (!req.session) {
         throw new RouteError(401, 'Não autorizado');
       }
-      res.status(200).json({ title: 'Sessão válida' });
+      res.status(200).json({ title: 'Sessão válida', role: req.session.role });
     },
     deleteSession: async (req, res) => {
       const sid = req.cookies[COOKIE_SID_NAME];
