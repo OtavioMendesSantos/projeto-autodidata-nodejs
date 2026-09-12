@@ -31,7 +31,7 @@
 
       <nav data-role="admin">
         <ul>
-          <li><a href="#/criar-cursos">Cursos</a></li>
+          <li><a href="#/criar-curso">Cursos</a></li>
           <li><a href="#/criar-aula">Aulas</a></li>
           <li><a href="#/usuarios">Users</a></li>
           <li><a href="#/sair">Sair</a></li>
@@ -363,5 +363,53 @@
         display: block;
       }
     </style>
+    <script>
+      const routes = document.querySelectorAll('section[data-role]');
+      const navs = document.querySelectorAll('nav[data-role]');
+
+      function handleUserNav() {
+        for (const nav of navs) {
+          if (nav.dataset.role === user) {
+            nav.classList.add('ativo');
+          } else {
+            nav.classList.remove('ativo');
+          }
+        }
+      }
+
+      let user;
+
+      async function getUser() {
+        user = 'public';
+        try {
+          const response = fetch('/auth/session');
+          const body = await response.json();
+          if (!response.ok) throw new Error();
+          return user;
+        } catch {
+          return user;
+        } finally{
+          handleUserNav()
+        }
+      }
+
+      async function router() {
+        if (!user) user = await getUser();
+        const r = location.hash
+          .replace('#', '')
+          .split('/')
+          .filter(Boolean)
+          .shift();
+
+        const route = document.getElementById(r);
+        routes.forEach((item) => item.classList.remove('ativo'));
+        if (route) {
+          if (user !== route.dataset.role) location.hash = 'login';
+          route.classList.add('ativo');
+        }
+      }
+      window.addEventListener('hashchange', router);
+      window.addEventListener('DOMContentLoaded', router);
+    </script>
   </body>
 </html>
