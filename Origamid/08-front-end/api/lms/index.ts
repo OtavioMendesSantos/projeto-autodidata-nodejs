@@ -130,7 +130,7 @@ export default class lmsApi extends Api {
       });
       if (!writeResultCertificate.changes)
         throw new RouteError(400, 'Erro ao deletar certificado');
-      
+
       res.status(200).json({ title: 'Curso resetado' });
     },
     getLesson: (req, res) => {
@@ -164,6 +164,14 @@ export default class lmsApi extends Api {
         title: 'Aula encontrada',
         lesson: { ...lesson, prev, next, completed },
       });
+    },
+    getLessons: (req, res) => {
+      const lessons = this.query.selectAllLessons();
+      if (lessons.length === 0)
+        throw new RouteError(404, 'Nenhuma aula encontrada');
+      res
+        .status(200)
+        .json({ title: 'Aulas encontradas com sucesso', data: lessons });
     },
     completeLesson: (req, res) => {
       if (!req.session) throw new RouteError(401, 'Não autorizado.');
@@ -227,6 +235,9 @@ export default class lmsApi extends Api {
       this.authMiddleware.guard('admin'),
     ]);
     this.router.get('/lms/courses', this.handlers.getCourses);
+    this.router.get('/lms/lessons', this.handlers.getLessons, [
+      this.authMiddleware.guard('admin'),
+    ]);
     this.router.get('/lms/course/:slug', this.handlers.getCourse, [
       this.authMiddleware.optional,
     ]);

@@ -29,6 +29,10 @@ type LessonCreate = Omit<LessonData, 'id' | 'course_id' | 'created'> & {
   courseSlug: string;
 };
 
+type CompleteLessonData = LessonData & {
+  courseSlug: string;
+};
+
 type CertificateFullDate = {
   id: string;
   name: string;
@@ -68,10 +72,17 @@ export class LmsQuery extends Query {
     return this.db
       .query(
         /* sql */ `
-      INSERT OR IGNORE INTO "lessons"
+      INSERT INTO "lessons"
         ("course_id", "slug", "title", "seconds",
         "video", "description", "order", "free")
       VALUES ((SELECT "id" FROM "courses" WHERE "slug" = ?),?,?,?,?,?,?,?)
+      ON CONFLICT ("course_id", "slug") DO UPDATE SET
+        "title" = excluded."title",
+        "description" = excluded."description",
+        "seconds" = excluded."seconds",
+        "video" = excluded."video",
+        "order" = excluded."order",
+        "free" = excluded."free"
     `,
       )
       .run(courseSlug, slug, title, seconds, video, description, order, free);
@@ -105,6 +116,17 @@ export class LmsQuery extends Query {
     `,
       )
       .all(courseSlug) as LessonData[];
+  }
+  selectAllLessons() {
+    return this.db
+      .query(
+        /*sql */ `
+      SELECT "l".*, "c"."slug" as "courseSlug" FROM "lessons" as "l"
+      JOIN "courses" as "c" ON "c"."id" = "l"."course_id"
+      ORDER BY "l"."course_id", "l"."order" ASC LIMIT 200
+    `,
+      )
+      .all() as CompleteLessonData[];
   }
   selectLesson({
     courseSlug,

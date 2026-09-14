@@ -789,7 +789,31 @@
             render.append(select);
           });
         },
-        
+        ['criar-aula']: (route) => {
+          getData('/lms/lessons', ({ data: lessons }) => {
+            const render = route.querySelector('.render');
+            const form = route.querySelector('form');
+            render.innerHTML = '';
+            const select = document.createElement('select');
+            select.name = 'lessons-select';
+            let i = 0;
+            select.add(new Option('Selecionar aula', null));
+            render.append(select);
+            for (const lesson of lessons) {
+              select.add( new Option(`${lesson.courseSlug} - ${lesson.slug}`, i))
+              i++
+            }
+            select.addEventListener('change', (e) => {
+              e.preventDefault();
+              const lesson = lessons[select.value];
+              for (const key in lesson) {
+                const input = form.querySelector(`[name="${key}"]`);
+                console.log(input)
+                if (input) input.value = lesson[key];
+              }
+            });
+          });
+        },
       };
 
       // FORMULÁRIOS
@@ -838,6 +862,7 @@
         if (res.ok) setTimeout(() => (location.hash = '/login'), 1500);
       });
       sendForm('POST', '/lms/course', 'criar-curso');
+      // sendForm('POST', '/lms/lesson', 'criar-aula');
     </script>
   </body>
 </html>
