@@ -43,9 +43,14 @@ export class LmsQuery extends Query {
     return this.db
       .query(
         /* sql */ `
-      INSERT OR IGNORE INTO "courses"
+      INSERT INTO "courses"
         ("slug","title","description","lessons","hours")
       VALUES (?,?,?,?,?)
+      ON CONFLICT ("slug") DO UPDATE SET
+        "title" = excluded."title",
+        "description" = excluded."description",
+        "lessons" = excluded."lessons",
+        "hours" = excluded."hours"
     `,
       )
       .run(slug, title, description, lessons, hours);
