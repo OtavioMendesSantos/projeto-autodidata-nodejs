@@ -501,6 +501,25 @@
         font-size: 0.75rem;
         line-height: 1;
       }
+
+      /* certificados*/
+      #certificados ul {
+        list-style: none;
+        display: grid;
+        gap: 1.5rem;
+      }
+      #certificados ul li a {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem;
+        align-items: center;
+        font-family: var(--font);
+      }
+      #certificados ul li a span {
+        font-size: 0.75rem;
+        font-family: monospace;
+      }
     </style>
     <script>
       const esc = (v) =>
@@ -710,7 +729,27 @@
             render.innerHTML = html;
           });
         },
-        certificados: (route) => {},
+        certificados: (route) => {
+          getData('/lms/certificates', ({ certificates }, res) => {
+            const render = route.querySelector('.render');
+            render.innerHTML = '';
+            let html = /*html*/ `<ul>`;
+            if (!Array.isArray(certificates)) return;
+            for (const certificate of certificates) {
+              html += /*html*/ `
+              <li>
+                <a class="btn" target="_blank" href="/lms/certificate/${certificate.id}">
+                  ${esc(certificate.title)}
+                  <span>${certificate.completed.slice(0, 10).split('-').reverse().join('/')}</span>
+                </a>
+              </li>
+              `;
+            }
+
+            html += /*html*/ `</ul>`;
+            render.innerHTML = html;
+          });
+        },
       };
 
       // FORMULÁRIOS

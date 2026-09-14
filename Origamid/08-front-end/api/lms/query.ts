@@ -203,6 +203,22 @@ export class LmsQuery extends Query {
       )
       .run(userId, courseId);
   }
+  deleteCertificate({
+    userId,
+    courseId,
+  }: {
+    userId: number;
+    courseId: number;
+  }) {
+    return this.db
+      .query(
+        /*sql */ `
+      DELETE FROM "certificates" WHERE
+      "user_id" = ? AND "course_id" = ?
+    `,
+      )
+      .run(userId, courseId);
+  }
   selectProgress({ userId, courseId }: { userId: number; courseId: number }) {
     return this.db
       .query(

@@ -117,12 +117,20 @@ export default class lmsApi extends Api {
       const userId = req.session.userId;
 
       const { courseId } = { courseId: v.number(req.body.courseId) };
-      const writeResult = this.query.deleteLessonsCompleted({
+      const writeResultLessons = this.query.deleteLessonsCompleted({
         userId,
         courseId,
       });
-      if (!writeResult.changes)
+      if (!writeResultLessons.changes)
         throw new RouteError(400, 'Erro ao resetar curso');
+
+      const writeResultCertificate = this.query.deleteCertificate({
+        userId: req.session.userId,
+        courseId,
+      });
+      if (!writeResultCertificate.changes)
+        throw new RouteError(400, 'Erro ao deletar certificado');
+      
       res.status(200).json({ title: 'Curso resetado' });
     },
     getLesson: (req, res) => {
