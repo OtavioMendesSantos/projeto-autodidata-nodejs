@@ -156,7 +156,7 @@ export default class authApi extends Api {
         ip: req.ip,
         ua: req.headers['user-agent'] ?? '',
       });
-      const resetLink = `${req.baseurl}/password/reset/${token}`;
+      const resetLink = `${req.baseurl}#/resetar/?=${token}`;
       const mailContent = {
         to: user.email,
         subject: 'Password reset',

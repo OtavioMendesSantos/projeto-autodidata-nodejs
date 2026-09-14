@@ -64,10 +64,10 @@
       <section id="resetar" data-role="public">
         <h2>Resetar Senha</h2>
         <form>
-          <label for="new_password">Email</label>
+          <label for="new_password">Senha</label>
           <input type="password" name="new_password" id="new_password" />
-          <input type="hidden" />
-          <button>Resetar Senhar</button>
+          <input type="hidden" name="token" />
+          <button>Resetar Senha</button>
         </form>
       </section>
 
@@ -581,6 +581,8 @@
           if (user !== route.dataset.role) location.hash = 'login';
           route.classList.add('ativo');
           if (typeof data[r] === 'function') data[r](route);
+        } else {
+          if (typeof data[r] === 'function') data[r]();
         }
       }
 
@@ -750,6 +752,21 @@
             render.innerHTML = html;
           });
         },
+        sair: async () => {
+          await fetch('/auth/logout', {
+            method: 'DELETE',
+          });
+          user = 'public';
+          location.hash = 'login';
+          handleUserNav();
+        },
+        resetar: () => {
+          const query = location.hash.split('=');
+          if (query[1]) {
+            const token = document.querySelector('input[name="token"]');
+            if (token) token.value = query[1];
+          }
+        },
       };
 
       // FORMULÁRIOS
@@ -792,6 +809,10 @@
       sendForm('POST', '/auth/user', 'criar-conta', (res, bod) => {
         setTimeout(() => (location.hash = '/login'), 1000);
         console.log(res, bod);
+      });
+      sendForm('POST', '/auth/password/forgot', 'perdeu');
+      sendForm('POST', '/auth/password/reset', 'resetar', (res, bod) => {
+        if (res.ok) setTimeout(() => (location.hash = '/login'), 1500);
       });
     </script>
   </body>
