@@ -371,6 +371,7 @@
         background: #211100;
         color: #ffca16;
         grid-column: 2;
+        margin-bottom: .5rem;
       }
       .ok {
         background: #0c281c;
@@ -532,6 +533,21 @@
         callback(body, response);
       }
 
+      function renderResetCourseButton(courseId) {
+        setTimeout(() => {
+          sendForm('DELETE', '/lms/course/reset', 'resetar-curso', () => {
+            location.reload();
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="resetar-curso">
+          <form>
+            <input name="courseId" type="hidden" value="${esc(courseId)}">
+            <button>Resetar</button>
+        </div>
+        `;
+      }
+
       const data = {
         cursos: (route) => {
           getData('/lms/courses', ({ data }) => {
@@ -588,7 +604,10 @@
               `;
             }
 
-            html += /*html*/ `</ul>`;
+            html += /*html*/ `
+            </ul>
+            ${completed.length > 0 ? renderResetCourseButton(course.id) : ''}
+            `;
 
             render.innerHTML = html;
           });
@@ -602,7 +621,6 @@
         form?.addEventListener('submit', async (e) => {
           e.preventDefault();
           const data = new FormData(form);
-          // console.log(Object.fromEntries(data));
           let response;
           let body;
           const badge = document.createElement('div');
