@@ -371,7 +371,7 @@
         background: #211100;
         color: #ffca16;
         grid-column: 2;
-        margin-bottom: .5rem;
+        margin-bottom: 0.5rem;
       }
       .ok {
         background: #0c281c;
@@ -459,6 +459,48 @@
       #resetar-curso button {
         margin: 1rem auto;
       }
+
+      /* aula */
+      #aula h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0px;
+      }
+      #breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--gray-4);
+      }
+      #breadcrumb a {
+        color: var(--gray-4);
+        text-decoration: none;
+        font-family: sans-serif;
+        font-size: 0.75rem;
+      }
+      #video {
+        aspect-ratio: 16/9;
+        margin: 1rem auto;
+        border-radius: 12px;
+        border: 1px solid var(--gray-1);
+        overflow: hidden;
+      }
+      video {
+        aspect-ratio: 16/9;
+        max-width: 100%;
+      }
+      #aula-nav {
+        display: grid;
+        grid-template-columns: 100px 1fr 100px;
+        justify-content: space-between;
+        justify-items: center;
+      }
+      #aula-nav a,
+      #aula-nav button {
+        padding: 0.5rem;
+        min-width: 70px;
+        font-size: 0.75rem;
+        line-height: 1;
+      }
     </style>
     <script>
       const esc = (v) =>
@@ -526,7 +568,6 @@
       window.addEventListener('hashchange', router);
       window.addEventListener('DOMContentLoaded', router);
 
-      //
       async function getData(url, callback) {
         const response = await fetch(url);
         const body = await response.json();
@@ -544,6 +585,22 @@
           <form>
             <input name="courseId" type="hidden" value="${esc(courseId)}">
             <button>Resetar</button>
+        </div>
+        `;
+      }
+
+      function renderCompleteButton(courseId, lessonId) {
+        setTimeout(() => {
+          sendForm('POST', '/lms/lesson/complete', 'completar', () => {
+            document.getElementById('completar').innerHTML = /*html*/ `<span/>`;
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="completar">
+          <form>
+            <input name="courseId" type="hidden" value="${esc(courseId)}">
+            <input name="lessonId" type="hidden" value="${esc(lessonId)}">
+            <button>Completar</button>
         </div>
         `;
       }
@@ -609,6 +666,47 @@
             ${completed.length > 0 ? renderResetCourseButton(course.id) : ''}
             `;
 
+            render.innerHTML = html;
+          });
+        },
+        aula: (route) => {
+          const [_, course, lesson] = location.hash
+            .replace('#', '')
+            .split('/')
+            .filter(Boolean);
+          if (!lesson || !course) return;
+          getData(`/lms/lesson/${course}/${lesson}`, ({ lesson }, res) => {
+            const render = route.querySelector('.render');
+            render.innerHTML = '';
+            let html = /*html*/ `
+            <div>
+              <h2>${esc(lesson.title)}</h2>
+              <div id="breadcrumb">
+                <a href="#/cursos">cursos</a> >
+                <a href="#/cursos/${course}">${course}</a>
+              </div>
+              <div id="video">
+                <video poster="" preload="metadata" src="/${lesson.video}" controls></video>
+              </div>
+              <nav id="aula-nav">
+                  ${
+                    lesson.prev
+                      ? /*html*/ `<a class="btn" href="${esc(`#/aula/${course}/${lesson.prev}`)}">Anterior</a>`
+                      : /*html*/ `<span></span>`
+                  }
+                  ${
+                    lesson.completed
+                      ? /*html*/ `<span></span>`
+                      : renderCompleteButton(lesson.course_id, lesson.id)
+                  }
+                  ${
+                    lesson.next
+                      ? /*html*/ `<a class="btn" href="${esc(`#/aula/${course}/${lesson.next}`)}">Próximo</a>`
+                      : /*html*/ `<span></span>`
+                  }
+              </nav>
+            </div>
+            `;
             render.innerHTML = html;
           });
         },
