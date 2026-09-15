@@ -1,0 +1,9 @@
+.git
+.env
+.vscode
+.dockerignore
+Dockerfile
+node_modules/
+secrets/
+files/
+database/
