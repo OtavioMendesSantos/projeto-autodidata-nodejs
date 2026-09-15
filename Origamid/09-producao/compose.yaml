@@ -2,14 +2,20 @@ services:
   node:
     image: node:26-alpine
     working_dir: /app
-    command: node index.ts
+    command: node --watch index.ts
     ports:
       - '9090:3000'
     volumes:
       - .:/app
+      - database:/database
+      - files:/files
   caddy:
     image: caddy:alpine
     ports:
       - '80:80'
     volumes:
-      - .:/usr/share/caddy
+      - ./front:/usr/share/caddy
+
+volumes:
+  database:
+  files:
