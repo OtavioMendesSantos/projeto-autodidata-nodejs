@@ -21,6 +21,7 @@ type UserSelect = {
   email: string;
   username: string;
   created: string;
+  total: number;
 };
 
 type SessionData = {
@@ -219,8 +220,12 @@ export class AuthQuery extends Query {
     return this.db
       .query(
         /*sql*/ `
-      SELECT "id", "name", "email", "username", "created" FROM "users"
+      SELECT 
+        "id", "name", "email", "username", "created",
+        COUNT("id") OVER() as "total"
+      FROM "users"
       WHERE "name" LIKE ? OR "email" LIKE ? OR "username" LIKE ?
+      ORDER BY "created" DESC
       LIMIT ? OFFSET ? 
       `,
       )

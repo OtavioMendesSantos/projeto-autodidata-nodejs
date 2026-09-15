@@ -816,8 +816,14 @@
           });
         },
         usuarios: (route) => {
-          getData('/auth/users/search', (users, response) => {
-            
+          const form = document.querySelector('#usuarios form');
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            getData(
+              `/auth/users/search?s=${data.get('s')}&page=${data.get('page')}`,
+              (users, response) => {},
+            );
           });
         },
       };
