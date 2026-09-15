@@ -187,12 +187,11 @@ export default class authApi extends Api {
       res.status(200).json({ title: 'Senha atualizada com sucesso' });
     },
     searchUsers: (req, res) => {
-      // search?: string, limit?: number, page?: number
       const { s, page } = {
         s: v.o.string(req.query.get('s')),
         page: v.o.number(req.query.get('page')),
       };
-      const result = this.query.selectUsers(s, 10, page);
+      const result = this.query.selectUsers(s, 5, page);
       if (result.length === 0) {
         res.setHeader('X-Total-Count', '0');
         res

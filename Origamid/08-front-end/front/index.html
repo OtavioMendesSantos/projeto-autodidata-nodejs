@@ -149,6 +149,7 @@
           <input type="number" name="page" id="page" value="1" />
           <button class="hidden">Buscar</button>
         </form>
+        <div class="render"></div>
       </section>
     </div>
     <style>
@@ -518,6 +519,35 @@
       select {
         margin-bottom: 1rem;
       }
+
+      /* usuarios */
+      #usuarios ul {
+        margin-top: 1rem;
+        list-style: none;
+      }
+      #usuarios li {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem;
+        font-size: 0.75rem;
+        border-bottom: 2px dashed var(--gray-1);
+        padding: 0.5rem 0;
+        color: var(--gray-5);
+      }
+      .hidden {
+        display: none;
+      }
+
+      #pages {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      #pages button {
+        min-width: max-content;
+        padding: 0.25rem 0.75rem;
+      }
     </style>
     <script>
       const esc = (v) =>
@@ -623,6 +653,40 @@
         </div>
         `;
       }
+
+      const renderUsers = (users, total, render) => {
+        render.innerHTML = '';
+        let html = /*html */ `<ul>`;
+        const pages = document.createElement('nav');
+        pages.id = 'pages';
+        const page = document.getElementById('page');
+        const form = document.querySelector('#usuarios form');
+        const totalPages = Math.ceil(total / 5);
+
+        if (totalPages > 1) {
+          for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            button.addEventListener('click', (e) => {
+              page.value = i;
+              form.requestSubmit();
+            });
+            pages.append(button);
+          }
+        }
+        for (const user of users) {
+          html += /*html*/ `
+          <li>
+            <span>${esc(user.name)}</span>  
+            <span>${esc(user.email)}</span>  
+          </li>
+          `;
+        }
+
+        html += /*html*/ `</ul>`;
+        render.innerHTML = html;
+        render.append(pages);
+      };
 
       const data = {
         cursos: (route) => {
@@ -816,13 +880,21 @@
           });
         },
         usuarios: (route) => {
+          const render = route.querySelector('.render');
           const form = document.querySelector('#usuarios form');
+          getData('/auth/users/search', ({data: users}, response) => {
+            const total = Number(response.headers.get('x-total-count'));
+            renderUsers(users, total, render);
+          });
           form.addEventListener('submit', (e) => {
             e.preventDefault();
             const data = new FormData(form);
             getData(
               `/auth/users/search?s=${data.get('s')}&page=${data.get('page')}`,
-              (users, response) => {},
+              ({ data: users }, response) => {
+                const total = Number(response.headers.get('x-total-count'));
+                renderUsers(users, total, render);
+              },
             );
           });
         },
