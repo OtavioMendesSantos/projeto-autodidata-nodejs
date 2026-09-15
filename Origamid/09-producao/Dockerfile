@@ -1,5 +1,5 @@
 FROM node:26-alpine
 
-COPY . .
+COPY . ./app
 
-CMD ["node", "index.ts"]
+CMD ["node", "./app/index.ts"]
