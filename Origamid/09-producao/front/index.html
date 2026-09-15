@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tiny LMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cardo&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Tiny LMS</h1>
+    <div class="container">
+      <nav data-role="public">
+        <ul>
+          <li><a href="#/login">Login</a></li>
+          <li><a href="#/criar-conta">Criar</a></li>
+        </ul>
+      </nav>
+
+      <nav data-role="user">
+        <ul>
+          <li><a href="#/cursos">Cursos</a></li>
+          <li><a href="#/certificados">Certificados</a></li>
+          <li><a href="#/sair">Sair</a></li>
+        </ul>
+      </nav>
+
+      <nav data-role="admin">
+        <ul>
+          <li><a href="#/criar-curso">Cursos</a></li>
+          <li><a href="#/criar-aula">Aulas</a></li>
+          <li><a href="#/usuarios">Users</a></li>
+          <li><a href="#/sair">Sair</a></li>
+        </ul>
+      </nav>
+
+      <section id="login" data-role="public">
+        <h2>Login Conta</h2>
+        <form>
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" />
+          <label for="password">Senha</label>
+          <input type="password" name="password" id="password" />
+          <div class="split">
+            <button>Login</button>
+            <a href="#/perdeu">Recuperar Senha</a>
+          </div>
+        </form>
+      </section>
+
+      <section id="perdeu" data-role="public">
+        <h2>Perdeu a senha?</h2>
+        <form>
+          <label for="email-perdeu">Email</label>
+          <input type="email" name="email" id="email-perdeu" />
+          <button>Esqueci a Senha</button>
+        </form>
+      </section>
+
+      <section id="resetar" data-role="public">
+        <h2>Resetar Senha</h2>
+        <form>
+          <label for="new_password">Senha</label>
+          <input type="password" name="new_password" id="new_password" />
+          <input type="hidden" name="token" />
+          <button>Resetar Senha</button>
+        </form>
+      </section>
+
+      <section id="criar-conta" data-role="public">
+        <h2>Criar Conta</h2>
+        <form>
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username" />
+          <label for="email-criar">Email</label>
+          <input type="email" name="email" id="email-criar" />
+          <label for="name">Nome</label>
+          <input type="text" name="name" id="name" />
+          <label for="password-criar">Senha</label>
+          <input type="password" name="password" id="password-criar" />
+          <button>Criar Conta</button>
+        </form>
+      </section>
+
+      <section id="criar-curso" data-role="admin">
+        <div class="render"></div>
+        <form>
+          <label for="slug">Slug</label>
+          <input type="text" name="slug" id="slug" />
+          <label for="title">Título</label>
+          <input type="text" name="title" id="title" />
+          <label for="description">Descrição</label>
+          <input type="text" name="description" id="description" />
+          <label for="lessons">Aulas</label>
+          <input type="number" name="lessons" id="lessons" />
+          <label for="hours">Horas</label>
+          <input type="number" name="hours" id="hours" />
+          <button>Criar/Atualizar Curso</button>
+        </form>
+      </section>
+
+      <section id="criar-aula" data-role="admin">
+        <div class="render"></div>
+        <form>
+          <label for="course-slug">Curso</label>
+          <input type="text" name="courseSlug" id="course-slug" />
+          <label for="lesson-slug">Slug</label>
+          <input type="text" name="slug" id="lesson-slug" />
+          <label for="lesson-title">Título</label>
+          <input type="text" name="title" id="lesson-title" />
+          <label for="lesson-description">Descrição</label>
+          <input type="text" name="description" id="lesson-description" />
+          <label for="seconds">Segundos</label>
+          <input type="number" name="seconds" id="seconds" />
+          <label for="order">Ordem</label>
+          <input type="number" name="order" id="order" />
+          <label for="free">Gratuita</label>
+          <input type="number" name="free" id="free" value="0" />
+          <label for="file">Vídeo</label>
+          <input type="file" name="file" id="file" />
+          <label for="video-path">Vídeo Path</label>
+          <input type="text" name="video" id="video-path" />
+          <button>Criar/Atualizar Curso</button>
+        </form>
+      </section>
+
+      <section id="cursos" data-role="user">
+        <div class="render"></div>
+      </section>
+      <section id="curso" data-role="user">
+        <div class="render"></div>
+      </section>
+      <section id="aula" data-role="user">
+        <div class="render"></div>
+      </section>
+      <section id="certificados" data-role="user">
+        <div class="render"></div>
+      </section>
+
+      <section id="usuarios" data-role="admin">
+        <form>
+          <label for="s">Buscar:</label>
+          <input type="text" name="s" id="s" />
+          <label for="page">Página:</label>
+          <input type="number" name="page" id="page" value="1" />
+          <button class="hidden">Buscar</button>
+        </form>
+        <div class="render"></div>
+      </section>
+    </div>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        --font: 'Cardo', serif;
+        --black: black;
+        --gray-1: #171717;
+        --gray-2: #222;
+        --gray-3: #333;
+        --gray-4: #777;
+        --gray-5: #aaa;
+        --gray-6: #ccc;
+        --gray-7: #ececec;
+        --white: white;
+        --gradient-1: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.025)
+        );
+        --gradient-2: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.1),
+          rgba(255, 255, 255, 0.05)
+        );
+        --gradient-3: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.15),
+          rgba(255, 255, 255, 0.1)
+        );
+      }
+      body {
+        margin-bottom: 600px;
+        font-family: var(--font);
+        background: var(--black);
+        color: var(--white);
+        font-size: 1.125rem;
+      }
+      ul,
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0px;
+        padding: 0px;
+      }
+      h1 {
+        text-align: center;
+        margin: 2rem 0;
+        font-size: 3rem;
+      }
+      h2 {
+        margin-bottom: 1.5rem;
+      }
+      a {
+        color: var(--gray-4);
+      }
+      .container {
+        max-width: 33rem;
+        padding: 0.5rem;
+        margin: 0 auto 6rem auto;
+      }
+      section > form {
+        display: grid;
+        grid-template-columns: 6rem 1fr;
+        gap: 1rem 0.5rem;
+        align-items: center;
+        margin-left: -7rem;
+        margin-bottom: 2rem;
+      }
+      input,
+      label {
+        display: block;
+        width: 100%;
+        font-size: 1rem;
+        border: 1px solid var(--gray-2);
+        box-shadow: inset 0 0 0 2px var(--black);
+        padding: 0.75rem;
+        font-family: sans-serif;
+        border-radius: 100px;
+        color: var(--gray-5);
+        background: var(--gradient-1);
+      }
+      label {
+        font-size: 0.85rem;
+        background: var(--gradient-2);
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--white);
+      }
+      form button,
+      form .split {
+        grid-column: 2;
+      }
+      .split {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+      @media (width < 47rem) {
+        section > form {
+          margin-left: 0;
+        }
+      }
+      @media (width < 28rem) {
+        section > form {
+          grid-template-columns: 5rem 1fr;
+          gap: 0.5rem;
+        }
+        label {
+          font-size: 0.75rem;
+        }
+        form .split {
+          flex-direction: column;
+          align-items: start;
+        }
+      }
+      button,
+      .btn,
+      select {
+        font-size: 1rem;
+        display: block;
+        width: max-content;
+        min-width: 160px;
+        padding: 0.75rem 1.5rem;
+        appearance: none;
+        font-family: sans-serif;
+        border-radius: 100px;
+        color: var(--white);
+        border: 1px solid var(--gray-2);
+        background: var(--gradient-2);
+        box-shadow: inset 0 0 0 2px var(--black);
+        text-decoration: none;
+        cursor: pointer;
+      }
+      button:hover,
+      .btn:hover,
+      select:hover {
+        border-color: var(--gray-3);
+        background: var(--gradient-3);
+      }
+      button:focus,
+      .btn:focus {
+        outline: none;
+        border-color: var(--white);
+      }
+      nav {
+        margin-bottom: 2rem;
+      }
+      nav ul {
+        display: flex;
+        justify-content: space-around;
+        list-style: none;
+        border: 1px solid var(--gray-2);
+        border-radius: 100px;
+        padding: 2px;
+      }
+      nav li {
+        display: block;
+        flex: 1;
+      }
+      nav a {
+        font-size: 1rem;
+        width: 100%;
+        padding: 0.5rem;
+        text-align: center;
+        font-family: var(--font);
+        text-decoration: none;
+        display: block;
+        color: var(--white);
+        background: var(--gradient-2);
+      }
+      nav li:first-child a {
+        border-top-left-radius: 100px;
+        border-bottom-left-radius: 100px;
+      }
+      nav li:last-child a {
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+      }
+      nav a:hover,
+      nav a.active {
+        background: var(--gradient-3);
+      }
+      select {
+        width: 100%;
+        margin-bottom: 2px;
+      }
+      section,
+      .render {
+        animation: slideIn 0.3s ease-out forwards;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      [data-role] {
+        display: none;
+      }
+      [data-role].ativo {
+        display: block;
+      }
+      .ok,
+      .fail {
+        padding: 0.5rem 1rem;
+        animation: slideIn 0.3s ease-out forwards;
+        border-radius: 100px;
+        width: max-content;
+        background: #211100;
+        color: #ffca16;
+        grid-column: 2;
+      }
+      .ok {
+        background: #0c281c;
+        color: #3dd78c;
+      }
+
+      /* curso */
+      #curso {
+        margin-top: 2rem;
+      }
+      .curso-item {
+        padding: 0 1rem 2rem 1rem;
+        border-bottom: 2px dashed var(--gray-1);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        text-align: center;
+        text-wrap: balance;
+      }
+      .curso-item > *:not(.btn) {
+        padding: 0.5rem;
+      }
+      .curso-item span:first-of-type {
+        border-right: 1px solid var(--gray-1);
+        justify-self: end;
+      }
+      .curso-item span:last-of-type {
+        border-left: 1px solid var(--gray-1);
+        justify-self: start;
+      }
+      .curso-item p,
+      .curso-item h2,
+      .curso-item .btn {
+        grid-column: 1/-1;
+      }
+      .curso-item .btn {
+        margin-top: 1rem;
+        justify-self: center;
+      }
+      .curso-item h2 {
+        margin: 1rem 0 0 0;
+      }
+      .curso-item p,
+      .curso-item span {
+        color: var(--gray-5);
+      }
+
+      /* aulas curso */
+      .curso-aulas {
+        list-style: none;
+        margin-top: 1rem;
+      }
+      .curso-aulas li a {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        padding: 0.75rem;
+        text-decoration: none;
+        align-items: center;
+        color: var(--gray-6);
+      }
+      .curso-aulas li:nth-of-type(even) a {
+        background: #111;
+      }
+      .curso-aulas li a:hover {
+        background: var(--gray-2);
+      }
+      .curso-aulas li a span {
+        color: var(--gray-4);
+        font-size: 0.75rem;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .curso-aulas .status {
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1px solid var(--gray-3);
+      }
+      .curso-aulas .status.completa {
+        background: linear-gradient(rgb(172, 239, 117), rgb(23, 232, 128));
+      }
+      #resetar-curso button {
+        margin: 1rem auto;
+      }
+
+      /* aula */
+      #aula h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0px;
+      }
+      #breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--gray-4);
+      }
+      #breadcrumb a {
+        color: var(--gray-4);
+        text-decoration: none;
+        font-family: sans-serif;
+        font-size: 0.75rem;
+      }
+      #video {
+        aspect-ratio: 16/9;
+        margin: 1rem auto;
+        border-radius: 12px;
+        border: 1px solid var(--gray-1);
+        overflow: hidden;
+      }
+      video {
+        aspect-ratio: 16/9;
+        max-width: 100%;
+      }
+      #aula-nav {
+        display: grid;
+        grid-template-columns: 100px 1fr 100px;
+        justify-content: space-between;
+        justify-items: center;
+      }
+      #aula-nav a,
+      #aula-nav button {
+        padding: 0.5rem;
+        min-width: 70px;
+        font-size: 0.75rem;
+        line-height: 1;
+      }
+
+      /* certificados */
+      #certificados ul {
+        list-style: none;
+        display: grid;
+        gap: 1.5rem;
+      }
+      #certificados ul li a {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem;
+        align-items: center;
+        font-family: var(--font);
+      }
+      select {
+        margin-bottom: 1rem;
+      }
+
+      /* usuarios */
+      #usuarios ul {
+        margin-top: 1rem;
+        list-style: none;
+      }
+      #usuarios li {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem;
+        font-size: 0.75rem;
+        border-bottom: 2px dashed var(--gray-1);
+        padding: 0.5rem 0;
+        color: var(--gray-5);
+      }
+      .hidden {
+        display: none;
+      }
+
+      #pages {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      #pages button {
+        min-width: max-content;
+        padding: 0.25rem 0.75rem;
+      }
+
+      #deletar-curso-btn {
+        border-color: #5a1a1a;
+        color: #ff6b6b;
+        margin: 1rem 0;
+      }
+    </style>
+    <script>
+      const esc = (v) =>
+        String(v)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+
+      const secToMin = (sec) => {
+        const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+        const ss = String(Math.floor(sec % 60)).padStart(2, '0');
+        return `${mm}:${ss}`;
+      };
+
+      const routes = document.querySelectorAll('section[data-role]');
+      const navs = document.querySelectorAll('nav[data-role]');
+
+      function handleUserNav() {
+        for (const nav of navs) {
+          if (nav.dataset.role === user) {
+            nav.classList.add('ativo');
+          } else {
+            nav.classList.remove('ativo');
+          }
+        }
+      }
+
+      let user;
+
+      async function getUser() {
+        user = 'public';
+        try {
+          const response = await fetch('/auth/session');
+          const body = await response.json();
+          if (!response.ok) throw new Error();
+          user = body.role;
+          return user;
+        } catch (err) {
+          console.error(err);
+          return user;
+        } finally {
+          handleUserNav();
+        }
+      }
+
+      async function router() {
+        if (!user) user = await getUser();
+        const r = location.hash
+          .replace('#', '')
+          .split('/')
+          .filter(Boolean)
+          .shift();
+
+        const route = document.getElementById(r);
+        routes.forEach((item) => item.classList.remove('ativo'));
+        if (route) {
+          if (user !== route.dataset.role) location.hash = 'login';
+          route.classList.add('ativo');
+          if (typeof data[r] === 'function') data[r](route);
+        } else {
+          if (typeof data[r] === 'function') data[r]();
+        }
+      }
+
+      window.addEventListener('hashchange', router);
+      window.addEventListener('DOMContentLoaded', router);
+
+      async function getData(url, callback) {
+        const response = await fetch(url);
+        const body = await response.json();
+        callback(body, response);
+      }
+
+      function renderResetCourseButton(courseId) {
+        setTimeout(() => {
+          sendForm('DELETE', '/lms/course/reset', 'resetar-curso', () => {
+            location.reload();
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="resetar-curso">
+          <form>
+            <input name="courseId" type="hidden" value="${esc(courseId)}">
+            <button>Resetar</button>
+        </div>
+        `;
+      }
+
+      function renderCompleteButton(courseId, lessonId) {
+        setTimeout(() => {
+          sendForm('POST', '/lms/lesson/complete', 'completar', () => {
+            document.getElementById('completar').innerHTML = /*html*/ `<span/>`;
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="completar">
+          <form>
+            <input name="courseId" type="hidden" value="${esc(courseId)}">
+            <input name="lessonId" type="hidden" value="${esc(lessonId)}">
+            <button>Completar</button>
+        </div>
+        `;
+      }
+
+      function renderDeleteCourse(courseSlug) {
+        setTimeout(() => {
+          const btn = document.getElementById('deletar-curso-btn');
+          if (!btn) return;
+          btn.addEventListener('click', async () => {
+            const badge = document.createElement('div');
+            try {
+              const response = await fetch(`/lms/course/${courseSlug}`, {
+                method: 'DELETE',
+              });
+              const body = await response.json();
+              if (!response.ok) throw new Error(body?.title || response.status);
+              badge.innerText = `${response.status} - Curso deletado`;
+              badge.classList.add('ok');
+              btn.parentElement.append(badge);
+              setTimeout(() => {
+                location.hash = '/criar-curso';
+                location.reload();
+              }, 1500);
+            } catch (err) {
+              badge.innerText = `Erro: ${err.message}`;
+              badge.classList.add('fail');
+              btn.parentElement.append(badge);
+              setTimeout(() => badge.remove(), 3000);
+            }
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="deletar-curso">
+          <button id="deletar-curso-btn" type="button">
+            Deletar Curso
+          </button>
+        </div>
+        `;
+      }
+
+      const renderUsers = (users, total, render) => {
+        render.innerHTML = '';
+        let html = /*html */ `<ul>`;
+        const pages = document.createElement('nav');
+        pages.id = 'pages';
+        const page = document.getElementById('page');
+        const form = document.querySelector('#usuarios form');
+        const totalPages = Math.ceil(total / 5);
+
+        if (totalPages > 1) {
+          for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            button.addEventListener('click', (e) => {
+              page.value = i;
+              form.requestSubmit();
+            });
+            pages.append(button);
+          }
+        }
+        for (const user of users) {
+          html += /*html*/ `
+          <li>
+            <span>${esc(user.name)}</span>  
+            <span>${esc(user.email)}</span>  
+          </li>
+          `;
+        }
+
+        html += /*html*/ `</ul>`;
+        render.innerHTML = html;
+        render.append(pages);
+      };
+
+      const data = {
+        cursos: (route) => {
+          getData('/lms/courses', ({ data }) => {
+            const render = route.querySelector('.render');
+            let html = '';
+            for (const course of data) {
+              html += /*html*/ `
+                <div class="curso-item">
+                  <h2>${esc(course.title)}</h2>
+                  <p>${esc(course.description)}</p>
+                  <span>Aulas: ${esc(course.lessons)}</span>
+                  <span>Horas: ${esc(course.hours)}</span>
+                  <a class='btn' href="#/curso/${esc(course.slug)}">
+                    ${esc(course.title)}
+                  </a>
+                </div>
+              `;
+            }
+            render.innerHTML = html;
+          });
+        },
+        curso: (route) => {
+          const [_, course] = location.hash
+            .replace('#', '')
+            .split('/')
+            .filter(Boolean);
+          if (!course) return;
+          getData(`/lms/course/${course}`, (data, res) => {
+            const { course, lessons, completed } = data;
+            const render = route.querySelector('.render');
+            let html = /*html*/ `
+            <div class="curso-item">
+                <h2>${esc(course.title)}</h2>
+                <p>${esc(course.description)}</p>
+                <span>Aulas: ${esc(course.lessons)}</span>
+                <span>Horas: ${esc(course.hours)}</span>
+              </div>
+            `;
+
+            html += /*html*/ `<ul class="curso-aulas">`;
+
+            for (const lesson of lessons) {
+              const isCompleted = completed.some((x) => lesson.id == lesson.id);
+              html += /*html*/ `
+                <li>
+                  <a href="#/aula/${esc(course.slug)}/${esc(lesson.slug)}">
+                  ${esc(lesson.title)}
+                  <span>
+                    <span>${secToMin(lesson.seconds)}</span>
+                    <span class="status ${isCompleted ? 'completa' : ''}"/>
+                  </span>
+                  </a>
+                </li>
+              `;
+            }
+
+            html += /*html*/ `
+            </ul>
+            ${completed.length > 0 ? renderResetCourseButton(course.id) : ''}
+            `;
+
+            render.innerHTML = html;
+          });
+        },
+        aula: (route) => {
+          const [_, course, lesson] = location.hash
+            .replace('#', '')
+            .split('/')
+            .filter(Boolean);
+          if (!lesson || !course) return;
+          getData(`/lms/lesson/${course}/${lesson}`, ({ lesson }, res) => {
+            const render = route.querySelector('.render');
+            render.innerHTML = '';
+            let html = /*html*/ `
+            <div>
+              <h2>${esc(lesson.title)}</h2>
+              <div id="breadcrumb">
+                <a href="#/cursos">cursos</a> >
+                <a href="#/curso/${course}">${course}</a>
+              </div>
+              <div id="video">
+                <video poster="" preload="metadata" src="/${lesson.video}" controls></video>
+              </div>
+              <nav id="aula-nav">
+                  ${
+                    lesson.prev
+                      ? /*html*/ `<a class="btn" href="${esc(`#/aula/${course}/${lesson.prev}`)}">Anterior</a>`
+                      : /*html*/ `<span></span>`
+                  }
+                  ${
+                    lesson.completed
+                      ? /*html*/ `<span></span>`
+                      : renderCompleteButton(lesson.course_id, lesson.id)
+                  }
+                  ${
+                    lesson.next
+                      ? /*html*/ `<a class="btn" href="${esc(`#/aula/${course}/${lesson.next}`)}">Próximo</a>`
+                      : /*html*/ `<span></span>`
+                  }
+              </nav>
+            </div>
+            `;
+            render.innerHTML = html;
+          });
+        },
+        certificados: (route) => {
+          getData('/lms/certificates', ({ certificates }, res) => {
+            const render = route.querySelector('.render');
+            render.innerHTML = '';
+            let html = /*html*/ `<ul>`;
+            if (!Array.isArray(certificates)) return;
+            for (const certificate of certificates) {
+              html += /*html*/ `
+              <li>
+                <a class="btn" target="_blank" href="/lms/certificate/${certificate.id}">
+                  ${esc(certificate.title)}
+                  <span>${certificate.completed.slice(0, 10).split('-').reverse().join('/')}</span>
+                </a>
+              </li>
+              `;
+            }
+
+            html += /*html*/ `</ul>`;
+            render.innerHTML = html;
+          });
+        },
+        sair: async () => {
+          await fetch('/auth/logout', {
+            method: 'DELETE',
+          });
+          user = 'public';
+          location.hash = 'login';
+          handleUserNav();
+        },
+        resetar: () => {
+          const query = location.hash.split('=');
+          if (query[1]) {
+            const token = document.querySelector('input[name="token"]');
+            if (token) token.value = query[1];
+          }
+        },
+        ['criar-curso']: async (route) => {
+          getData('/lms/courses', ({ data: courses }) => {
+            const render = route.querySelector('.render');
+            const form = route.querySelector('form');
+            render.innerHTML = '';
+            const select = document.createElement('select');
+            select.name = 'courses-select';
+            let i = 0;
+            select.add(new Option('Selecionar curso', null));
+            for (const course of courses) {
+              select.add(new Option(course.slug, i));
+              i++;
+            }
+            select.addEventListener('change', (e) => {
+              e.preventDefault();
+              const course = courses[select.value];
+              for (const key in course) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) input.value = course[key];
+              }
+            });
+            render.append(select);
+          });
+        },
+        ['criar-aula']: (route) => {
+          getData('/lms/lessons', ({ data: lessons }) => {
+            const render = route.querySelector('.render');
+            const form = route.querySelector('form');
+            render.innerHTML = '';
+            const select = document.createElement('select');
+            select.name = 'lessons-select';
+            let i = 0;
+            select.add(new Option('Selecionar aula', null));
+            render.append(select);
+            for (const lesson of lessons) {
+              select.add(
+                new Option(`${lesson.courseSlug} - ${lesson.slug}`, i),
+              );
+              i++;
+            }
+            select.addEventListener('change', (e) => {
+              e.preventDefault();
+              const lesson = lessons[select.value];
+              for (const key in lesson) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) input.value = lesson[key];
+              }
+            });
+          });
+        },
+        usuarios: (route) => {
+          const render = route.querySelector('.render');
+          const form = document.querySelector('#usuarios form');
+          getData('/auth/users/search', ({ data: users }, response) => {
+            const total = Number(response.headers.get('x-total-count'));
+            renderUsers(users, total, render);
+          });
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            getData(
+              `/auth/users/search?s=${data.get('s')}&page=${data.get('page')}`,
+              ({ data: users }, response) => {
+                const total = Number(response.headers.get('x-total-count'));
+                renderUsers(users, total, render);
+              },
+            );
+          });
+        },
+      };
+
+      // FORMULÁRIOS
+      async function sendForm(method, url, id, callback) {
+        const form = document.querySelector('#' + id + ' form');
+        form?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = new FormData(form);
+          let response;
+          let body;
+          const badge = document.createElement('div');
+          try {
+            response = await fetch(url, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(Object.fromEntries(data)),
+            });
+            body = await response.json();
+            if (!response.ok) throw new Error();
+            if (typeof callback === 'function') callback(response, body);
+            badge.innerText = `${response.status}`;
+            badge.classList.add('ok');
+          } catch {
+            badge.innerText = `${response.status} - ${body?.title}`;
+            badge.classList.add('fail');
+          } finally {
+            form.append(badge);
+            setTimeout(() => badge.remove(), 3000);
+          }
+        });
+      }
+
+      sendForm('POST', '/auth/login', 'login', async () => {
+        user = await getUser();
+        if (user === 'user') location.hash = '/cursos';
+        if (user === 'admin') location.hash = '/criar-curso';
+      });
+      sendForm('POST', '/auth/user', 'criar-conta', (res, bod) => {
+        setTimeout(() => (location.hash = '/login'), 1000);
+      });
+      sendForm('POST', '/auth/password/forgot', 'perdeu');
+      sendForm('POST', '/auth/password/reset', 'resetar', (res, bod) => {
+        if (res.ok) setTimeout(() => (location.hash = '/login'), 1500);
+      });
+      sendForm('POST', '/lms/course', 'criar-curso');
+
+      const lessonsForm = document.querySelector('#criar-aula form');
+      lessonsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          const input = lessonsForm.querySelector('input[type="file"]');
+          if (!input) return;
+          const files = input.files;
+          if (!files || files.length === 0) return;
+          const responseFile = await fetch('/files', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'x-filename': files[0].name,
+            },
+            body: files[0],
+          });
+          const upload = await responseFile.json();
+          const data = new FormData(lessonsForm);
+          data.set('video', upload.path);
+          const responseLesson = await fetch('/lms/lesson', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Object.fromEntries(data)),
+          });
+          if (responseLesson.ok) location.reload();
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    </script>
+  </body>
+</html>
