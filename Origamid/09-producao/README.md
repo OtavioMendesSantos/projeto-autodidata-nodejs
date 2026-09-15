@@ -1,5 +1,7 @@
 # 09-roducao
 
+## Cheatcodes docker
+
 ```bash
 docker build -t <name> <path>                                       # Faz o build imagem
 docker images                                                       # lista imagens
@@ -22,4 +24,10 @@ docker exec -it <container> sh                                      # Acessa o t
 docker pull <imagem>                                                # Baixa uma imagem do remota (ex: Docker Hub) sem executá-la
 docker system prune                                                 # Remove contêineres parados, redes não usadas e dangling images (imagens <none>)
 docker system prune -a                                              # Remove TUDO que não está em uso (contêineres parados, cache de build e imagens órfãs)
+```
+
+## Cheatcodes docker compose
+
+```bash
+
 ```

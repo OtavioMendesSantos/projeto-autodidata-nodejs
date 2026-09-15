@@ -1,0 +1,15 @@
+services:
+  node:
+    image: node:26-alpine
+    working_dir: /app
+    command: node index.ts
+    ports:
+      - '9090:3000'
+    volumes:
+      - .:/app
+  caddy:
+    image: caddy:alpine
+    ports:
+      - '80:80'
+    volumes:
+      - .:/usr/share/caddy
