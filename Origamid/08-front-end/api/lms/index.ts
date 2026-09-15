@@ -133,6 +133,14 @@ export default class lmsApi extends Api {
 
       res.status(200).json({ title: 'Curso resetado' });
     },
+    deleteCourse: (req, res) => {
+      if (!req.session) throw new RouteError(401, 'Não autorizado');
+      const { courseSlug } = req.params;
+      const writeChanges = this.query.deleteCourse({ courseSlug });
+      if (!writeChanges.changes)
+        throw new RouteError(401, 'Erro ao deletar curso');
+      res.status(200).json({ title: 'Curso excluído com sucesso' });
+    },
     getLesson: (req, res) => {
       if (!req.session) throw new RouteError(401, 'Não autorizado.');
       const userId = req.session.userId;
@@ -243,6 +251,9 @@ export default class lmsApi extends Api {
     ]);
     this.router.delete('/lms/course/reset', this.handlers.resetCourse, [
       this.authMiddleware.guard('user'),
+    ]);
+    this.router.delete('/lms/course/:courseSlug', this.handlers.deleteCourse, [
+      this.authMiddleware.guard('admin'),
     ]);
     this.router.post('/lms/lesson', this.handlers.postLesson, [
       this.authMiddleware.guard('admin'),

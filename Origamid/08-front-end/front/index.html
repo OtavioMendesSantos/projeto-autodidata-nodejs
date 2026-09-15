@@ -548,6 +548,12 @@
         min-width: max-content;
         padding: 0.25rem 0.75rem;
       }
+
+      #deletar-curso-btn {
+        border-color: #5a1a1a;
+        color: #ff6b6b;
+        margin: 1rem 0;
+      }
     </style>
     <script>
       const esc = (v) =>
@@ -650,6 +656,42 @@
             <input name="courseId" type="hidden" value="${esc(courseId)}">
             <input name="lessonId" type="hidden" value="${esc(lessonId)}">
             <button>Completar</button>
+        </div>
+        `;
+      }
+
+      function renderDeleteCourse(courseSlug) {
+        setTimeout(() => {
+          const btn = document.getElementById('deletar-curso-btn');
+          if (!btn) return;
+          btn.addEventListener('click', async () => {
+            const badge = document.createElement('div');
+            try {
+              const response = await fetch(`/lms/course/${courseSlug}`, {
+                method: 'DELETE',
+              });
+              const body = await response.json();
+              if (!response.ok) throw new Error(body?.title || response.status);
+              badge.innerText = `${response.status} - Curso deletado`;
+              badge.classList.add('ok');
+              btn.parentElement.append(badge);
+              setTimeout(() => {
+                location.hash = '/criar-curso';
+                location.reload();
+              }, 1500);
+            } catch (err) {
+              badge.innerText = `Erro: ${err.message}`;
+              badge.classList.add('fail');
+              btn.parentElement.append(badge);
+              setTimeout(() => badge.remove(), 3000);
+            }
+          });
+        }, 50);
+        return /*html*/ `
+        <div id="deletar-curso">
+          <button id="deletar-curso-btn" type="button">
+            Deletar Curso
+          </button>
         </div>
         `;
       }
@@ -882,7 +924,7 @@
         usuarios: (route) => {
           const render = route.querySelector('.render');
           const form = document.querySelector('#usuarios form');
-          getData('/auth/users/search', ({data: users}, response) => {
+          getData('/auth/users/search', ({ data: users }, response) => {
             const total = Number(response.headers.get('x-total-count'));
             renderUsers(users, total, render);
           });

@@ -246,6 +246,23 @@ export class LmsQuery extends Query {
       )
       .run(userId, courseId);
   }
+   deleteCourse({
+    courseSlug,
+  }: {
+    courseSlug: string;
+  }) {
+    return this.db
+      .query(
+        /*sql */ `
+      DELETE FROM "courses" WHERE
+      "id" = (
+        SELECT "id" FROM "courses" 
+        WHERE "slug" = ?
+      )
+    `,
+      )
+      .run(courseSlug);
+  }
   selectProgress({ userId, courseId }: { userId: number; courseId: number }) {
     return this.db
       .query(
