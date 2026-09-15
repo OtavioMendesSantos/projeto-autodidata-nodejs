@@ -71,11 +71,18 @@ export default class filesApi extends Api {
       try {
         await pipeline(req, limitBytes(MAX_BYTES), writeStream);
         await rename(tempPath, writePath);
-        res.status(201).end('ok');
+        res
+          .status(201)
+          .json({
+            title: 'Upload feito com sucesso',
+            path: writePath,
+            name: finalName,
+          });
       } catch (err) {
         if (err instanceof RouteError) {
           throw new RouteError(err.status, err.message);
         } else {
+          console.error(err)
           throw new RouteError(500, 'Ocorreu um erro');
         }
       } finally {

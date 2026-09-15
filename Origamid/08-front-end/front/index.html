@@ -800,15 +800,16 @@
             select.add(new Option('Selecionar aula', null));
             render.append(select);
             for (const lesson of lessons) {
-              select.add( new Option(`${lesson.courseSlug} - ${lesson.slug}`, i))
-              i++
+              select.add(
+                new Option(`${lesson.courseSlug} - ${lesson.slug}`, i),
+              );
+              i++;
             }
             select.addEventListener('change', (e) => {
               e.preventDefault();
               const lesson = lessons[select.value];
               for (const key in lesson) {
                 const input = form.querySelector(`[name="${key}"]`);
-                console.log(input)
                 if (input) input.value = lesson[key];
               }
             });
@@ -862,7 +863,39 @@
         if (res.ok) setTimeout(() => (location.hash = '/login'), 1500);
       });
       sendForm('POST', '/lms/course', 'criar-curso');
-      // sendForm('POST', '/lms/lesson', 'criar-aula');
+
+      const lessonsForm = document.querySelector('#criar-aula form');
+      lessonsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          const input = lessonsForm.querySelector('input[type="file"]');
+          if (!input) return;
+          const files = input.files;
+          if (!files || files.length === 0) return;
+          const responseFile = await fetch('/files', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'x-filename': files[0].name,
+            },
+            body: files[0],
+          });
+          const upload = await responseFile.json();
+          const data = new FormData(lessonsForm);
+          data.set('video', upload.path);
+          const responseLesson = await fetch('/lms/lesson', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Object.fromEntries(data)),
+          });
+          if (responseLesson.ok) location.reload();
+          console.log(upload);
+        } catch (err) {
+          console.error(err);
+        }
+      });
     </script>
   </body>
 </html>
