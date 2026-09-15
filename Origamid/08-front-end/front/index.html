@@ -815,6 +815,11 @@
             });
           });
         },
+        usuarios: (route) => {
+          getData('/auth/users/search', (users, response) => {
+            
+          });
+        },
       };
 
       // FORMULÁRIOS
@@ -856,7 +861,6 @@
       });
       sendForm('POST', '/auth/user', 'criar-conta', (res, bod) => {
         setTimeout(() => (location.hash = '/login'), 1000);
-        console.log(res, bod);
       });
       sendForm('POST', '/auth/password/forgot', 'perdeu');
       sendForm('POST', '/auth/password/reset', 'resetar', (res, bod) => {
@@ -891,7 +895,6 @@
             body: JSON.stringify(Object.fromEntries(data)),
           });
           if (responseLesson.ok) location.reload();
-          console.log(upload);
         } catch (err) {
           console.error(err);
         }

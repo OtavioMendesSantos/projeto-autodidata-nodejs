@@ -186,6 +186,12 @@ export default class authApi extends Api {
       }
       res.status(200).json({ title: 'Senha atualizada com sucesso' });
     },
+    searchUsers: (req, res) => {
+      const result = this.query.selectUsers();
+      res
+        .status(200)
+        .json({ title: 'Usuários encontrados com sucesso', data: result });
+    },
   } satisfies Api['handlers'];
 
   tables() {
@@ -211,6 +217,9 @@ export default class authApi extends Api {
     ]);
     this.router.put('/auth/password/update', this.handlers.passwordUpdate, [
       this.authMiddleware.guard('user'),
+    ]);
+    this.router.get('/auth/users/search', this.handlers.searchUsers, [
+      this.authMiddleware.guard('admin'),
     ]);
   }
 }

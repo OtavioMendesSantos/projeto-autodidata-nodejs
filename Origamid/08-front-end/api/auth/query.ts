@@ -15,6 +15,14 @@ type UserData = {
 
 type UserCreate = Omit<UserData, 'id' | 'created' | 'updated'>;
 
+type UserSelect = {
+  id: number;
+  name: string;
+  email: string;
+  username: string;
+  created: string;
+};
+
 type SessionData = {
   sid_hash: Buffer;
   user_id: number;
@@ -203,5 +211,19 @@ export class AuthQuery extends Query {
       `,
       )
       .run(user_id);
+  }
+  selectUsers(search: string = '', limit: number = 10, page: number = 1) {
+    const s = `%${search}%`;
+    const safeLimit = limit < 100 ? limit : 100;
+    const offset = (page - 1) * safeLimit;
+    return this.db
+      .query(
+        /*sql*/ `
+      SELECT "id", "name", "email", "username", "created" FROM "users"
+      WHERE "name" LIKE ? OR "email" LIKE ? OR "username" LIKE ?
+      LIMIT ? OFFSET ? 
+      `,
+      )
+      .all(s, s, s, safeLimit, offset) as UserSelect[];
   }
 }
